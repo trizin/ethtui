@@ -216,7 +216,7 @@ func getControlWalletItems() []list.Item {
 		ListItem{title: "Private Key", desc: "Display private key and QR", id: "private_key"},
 		ListItem{title: "Sign Message", desc: "Sign a message with the private key", id: "sign_message"},
 		ListItem{title: "Sign Transaction", desc: "Sign a transaction with the private key", id: "sign_transaction"},
-		ListItem{title: "Quit", desc: "Quit to terminal", id: "quit"},
+		ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"},
 	}
 	return items
 }
