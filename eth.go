@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"io/ioutil"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -30,6 +32,42 @@ func generateWallet() WalletData {
 func (w WalletData) privateKeyECDSA() *ecdsa.PrivateKey {
 	data, _ := crypto.HexToECDSA(w.PrivateKey)
 	return data
+}
+
+func (w WalletData) createKeystore(password string) string {
+	fileName := "./" + w.PublicKey + ".keystore"
+	ks := keystore.NewKeyStore(fileName, keystore.StandardScryptN, keystore.StandardScryptP)
+	_, err := ks.NewAccount(password)
+	if err != nil {
+		panic(err)
+	}
+	return fileName
+}
+
+func loadKeystore(path string, password string) WalletData {
+	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
+	accounts := ks.Accounts()
+	if len(accounts) == 0 {
+		panic("No accounts found in keystore")
+	}
+	account := accounts[0]
+
+	keyjson, err := ioutil.ReadFile(account.URL.Path)
+	if err != nil {
+		panic(err)
+	}
+
+	key, err := keystore.DecryptKey(keyjson, password)
+	if err != nil {
+		panic(err)
+	}
+
+	if key.Address != account.Address {
+		panic("Key address mismatch")
+	}
+
+	return getWalletDataFromPKECDSA(key.PrivateKey)
+
 }
 
 func (w WalletData) signTransaction(
