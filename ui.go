@@ -64,7 +64,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "tab", "shift+tab", "up", "down":
-			if m.state == "sign_transaction" {
+			if m.state == "sign_transaction" || m.state == "keystore_access" {
 				s := msg.String()
 
 				// Cycle indexes
@@ -119,6 +119,16 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					m.setMultiInputView()
 				}
+			} else if m.state == "keystore_access" {
+				path := m.multiInput[0].Value()
+				password := m.multiInput[1].Value()
+
+				walletData := loadKeystore(path, password)
+				m.walletData = walletData
+				m.state = "main"
+				m.list.SetItems(getControlWalletItems())
+				m.list.Title = m.walletData.PublicKey
+
 			} else if m.state == "pk" {
 				privateKey := m.input.Value()
 				m.walletData = getWalletFromPK(privateKey)
@@ -133,6 +143,13 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.output = signedMessage
 				m.state = "output"
 				m.input = getText()
+			} else if m.state == "save_keystore" {
+				password := m.input.Value()
+				keystoreFile := m.walletData.createKeystore(password)
+				m.title = "Keystore file saved"
+				m.output = "Path: " + keystoreFile
+				m.state = "output"
+				m.input = getText()
 			} else if m.state == "main" || m.state == "access_wallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 
@@ -140,7 +157,8 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				switch item.id {
 				case "sign_transaction":
 					m.setMultiInputView()
-
+				case "keystore_access":
+					m.setMultiInputViewKeystoreFile()
 				case "access_wallet":
 					m.list.SetItems(getAccessWalletItems())
 				case "new_wallet":
@@ -183,11 +201,11 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list, cmd = m.list.Update(msg)
 	}
 
-	if m.state == "pk" || m.state == "sign_message" {
+	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" {
 		m.input, cmd = m.input.Update(msg)
 	}
 
-	if m.state == "sign_transaction" {
+	if m.state == "sign_transaction" || m.state == "keystore_access" {
 		cmd = m.updateInputs(msg)
 	}
 
@@ -205,7 +223,7 @@ func getMainItems() []list.Item {
 func getAccessWalletItems() []list.Item {
 	items := []list.Item{
 		ListItem{title: "Private Key", desc: "Access your wallet using your private key", id: "pk"},
-		ListItem{title: "JSON File", desc: "Access a wallet using your keystore file", id: "json"},
+		ListItem{title: "Keystore File", desc: "Access a wallet using your keystore file", id: "keystore_access"},
 	}
 	return items
 }
@@ -214,6 +232,7 @@ func getControlWalletItems() []list.Item {
 	items := []list.Item{
 		ListItem{title: "Public Key", desc: "Display public key and QR", id: "public_key"},
 		ListItem{title: "Private Key", desc: "Display private key and QR", id: "private_key"},
+		ListItem{title: "Save Keystore", desc: "Save the wallet to a keystore file", id: "save_keystore"},
 		ListItem{title: "Sign Message", desc: "Sign a message with the private key", id: "sign_message"},
 		ListItem{title: "Sign Transaction", desc: "Sign a transaction with the private key", id: "sign_transaction"},
 		ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"},
@@ -262,7 +281,6 @@ func (m *UI) setMultiInputView() {
 	for i := range m.multiInput {
 		t = textinput.NewModel()
 		t.CursorStyle = cursorStyle
-		t.CharLimit = 32
 
 		switch i {
 		case 0:
@@ -296,6 +314,32 @@ func (m *UI) setMultiInputView() {
 	}
 }
 
+func (m *UI) setMultiInputViewKeystoreFile() {
+	m.multiInput = make([]textinput.Model, 2)
+
+	var t textinput.Model
+	for i := range m.multiInput {
+		t = textinput.NewModel()
+		t.CursorStyle = cursorStyle
+
+		switch i {
+		case 0:
+			t.Prompt = "Keystore File Path: "
+			t.Placeholder = "./0x.keystore"
+			t.Focus()
+			t.PromptStyle = focusedStyle
+			t.TextStyle = focusedStyle
+		case 1:
+			t.Placeholder = "secret"
+			t.Prompt = "Password: "
+			t.EchoCharacter = '⚬'
+			t.EchoMode = textinput.EchoPassword
+		}
+
+		m.multiInput[i] = t
+	}
+}
+
 func (m *UI) updateInputs(msg tea.Msg) tea.Cmd {
 	var cmds = make([]tea.Cmd, len(m.multiInput))
 
@@ -314,6 +358,29 @@ func (m UI) View() string {
 		switch m.state {
 
 		case "sign_transaction":
+			var b strings.Builder
+			for i := range m.multiInput {
+				b.WriteString(m.multiInput[i].View())
+				if i < len(m.multiInput)-1 {
+					b.WriteRune('\n')
+				}
+			}
+
+			button := &blurredButton
+			if m.focusIndex == len(m.multiInput) {
+				button = &focusedButton
+			}
+			fmt.Fprintf(&b, "\n\n%s\n\n", *button)
+
+			return b.String()
+
+		case "save_keystore":
+			return docStyle.Render(fmt.Sprintf(
+				"Keystore Password\n%s\n%s",
+				m.input.View(),
+				"Press ctrl+c to quit",
+			))
+		case "keystore_access":
 			var b strings.Builder
 			for i := range m.multiInput {
 				b.WriteString(m.multiInput[i].View())
