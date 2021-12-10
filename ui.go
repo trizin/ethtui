@@ -264,14 +264,14 @@ func (m *UI) setState(state string) {
 func dispalWalletPublicKey(walletData WalletData) string {
 	return fmt.Sprintf(
 		"%s\n%s",
-		walletData.PublicKeyQR.ToSmallString(true),
+		walletData.PublicKeyQR.ToSmallString(false),
 		"Public Key: "+walletData.PublicKey,
 	)
 }
 func displayWalletPrivateKey(walletData WalletData) string {
 	return fmt.Sprintf(
 		"%s\n%s",
-		walletData.PrivateKeyQR.ToSmallString(true),
+		walletData.PrivateKeyQR.ToSmallString(false),
 		"Private Key: "+walletData.PrivateKey,
 	)
 }
