@@ -2,4 +2,4 @@
 
 A small project I've been working on to understand Golang & Ethereum.
 
-![gif](eth_wallet.gif)
+![gif](./img/eth_wallet.gif)
