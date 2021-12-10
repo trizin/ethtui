@@ -101,7 +101,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 
 			if m.state == "new_wallet" || m.state == "get_info_wallet" || m.state == "output" {
-				m.state = "main"
+				m.setState("main")
 			} else if m.state == "sign_transaction" {
 				if m.focusIndex == len(m.multiInput) {
 					nonce, _ := strconv.Atoi(m.multiInput[0].Value())
@@ -115,7 +115,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					m.title = "Signed Transaction Hash"
 					m.output = signedTransaction
-					m.state = "output"
+					m.setState("output")
 
 					m.setMultiInputView()
 				}
@@ -125,14 +125,14 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				walletData := loadKeystore(path, password)
 				m.walletData = walletData
-				m.state = "main"
+				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
 				m.list.Title = m.walletData.PublicKey
 
 			} else if m.state == "pk" {
 				privateKey := m.input.Value()
 				m.walletData = getWalletFromPK(privateKey)
-				m.state = "main"
+				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
 				m.input = getText()
 				m.list.Title = m.walletData.PublicKey
@@ -141,19 +141,19 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				signedMessage := m.walletData.signMessage(message)
 				m.title = "Signed Message"
 				m.output = signedMessage
-				m.state = "output"
+				m.setState("output")
 				m.input = getText()
 			} else if m.state == "save_keystore" {
 				password := m.input.Value()
 				keystoreFile := m.walletData.createKeystore(password)
 				m.title = "Keystore file saved"
 				m.output = "Path: " + keystoreFile
-				m.state = "output"
+				m.setState("output")
 				m.input = getText()
 			} else if m.state == "main" || m.state == "access_wallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 
-				m.state = item.id
+				m.setState(item.id)
 				switch item.id {
 				case "sign_transaction":
 					m.setMultiInputView()
@@ -161,26 +161,27 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setMultiInputViewKeystoreFile()
 				case "access_wallet":
 					m.list.SetItems(getAccessWalletItems())
+					m.list.Title = "Access Wallet"
 				case "new_wallet":
 					walletData := generateWallet()
 					m.walletData = walletData
-					m.state = "main"
+					m.setState("main")
 					m.list.SetItems(getControlWalletItems())
 					m.input = getText()
 					m.list.Title = m.walletData.PublicKey
 				case "public_key":
 					m.output = dispalWalletPublicKey(m.walletData)
 					m.title = "Public Key"
-					m.state = "output"
+					m.setState("output")
 				case "private_key":
 					m.output = displayWalletPrivateKey(m.walletData)
 					m.title = "Private Key"
-					m.state = "output"
+					m.setState("output")
 				}
 
 				if m.state == "quit" {
 					m.list.SetItems(getMainItems())
-					m.state = "main"
+					m.setState("main")
 					m.list.Title = "✨✨✨"
 				}
 
@@ -224,6 +225,7 @@ func getAccessWalletItems() []list.Item {
 	items := []list.Item{
 		ListItem{title: "Private Key", desc: "Access your wallet using your private key", id: "pk"},
 		ListItem{title: "Keystore File", desc: "Access a wallet using your keystore file", id: "keystore_access"},
+		ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"},
 	}
 	return items
 }
@@ -255,7 +257,7 @@ func getUI() UI {
 	return m
 }
 
-func (m UI) setState(state string) {
+func (m *UI) setState(state string) {
 	m.state = state
 }
 
