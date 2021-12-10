@@ -10,7 +10,7 @@ import (
 func main() {
 
 	m := getUI()
-	m.list.Title = "Hi!"
+	m.list.Title = "✨✨✨"
 
 	p := tea.NewProgram(m)
 	p.EnterAltScreen()
