@@ -1,4 +1,4 @@
-module eth_wallet
+module crypto_wallet_toolkit
 
 go 1.17
 
