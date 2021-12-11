@@ -11,8 +11,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
-
 type ListItem struct {
 	title string
 	desc  string
@@ -24,12 +22,14 @@ func (i ListItem) Description() string { return i.desc }
 func (i ListItem) FilterValue() string { return i.title }
 
 var (
+	docStyle            = lipgloss.NewStyle().Margin(1, 2)
 	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
 	cursorStyle         = focusedStyle.Copy()
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle.Copy()
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
+	titleStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#9763e6")).Bold(true)
 
 	focusedButton = focusedStyle.Copy().Render("[ Submit ]")
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
@@ -177,6 +177,12 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.output = displayWalletPrivateKey(m.walletData)
 					m.title = "Private Key"
 					m.setState("output")
+				case "pk":
+					m.title = "Private Key"
+				case "sign_message":
+					m.title = "Message to sign"
+				case "save_keystore":
+					m.title = "Keystore Password"
 				}
 
 				if m.state == "quit" {
@@ -244,7 +250,6 @@ func getControlWalletItems() []list.Item {
 
 func getText() textinput.Model {
 	ti := textinput.NewModel()
-	ti.BlinkSpeed = 1
 	ti.Placeholder = "Private Key"
 	ti.Focus()
 	ti.CharLimit = 156
@@ -376,12 +381,6 @@ func (m UI) View() string {
 
 			return b.String()
 
-		case "save_keystore":
-			return docStyle.Render(fmt.Sprintf(
-				"Keystore Password\n%s\n%s",
-				m.input.View(),
-				"Press ctrl+c to quit",
-			))
 		case "keystore_access":
 			var b strings.Builder
 			for i := range m.multiInput {
@@ -399,24 +398,23 @@ func (m UI) View() string {
 
 			return b.String()
 
-		case "pk":
+		case "save_keystore", "pk", "sign_message":
 			return docStyle.Render(fmt.Sprintf(
-				"Private Key\n%s\n%s",
+				"%s\n%s\n%s",
+				titleStyle.Render(m.title),
 				m.input.View(),
-				"Press ctrl+c to quit",
+				blurredStyle.Render("Press ctrl+c to quit"),
 			))
-		case "sign_message":
-			return docStyle.Render(fmt.Sprintf(
-				"Message to sign: \n%s\n%s",
-				m.input.View(),
-				"Press ctrl+c to quit",
-			))
+
 		case "output":
-			return docStyle.Render(fmt.Sprintf(
-				m.title+"\n%s\n%s",
-				m.output,
-				"Press enter to continue",
-			))
+			in := fmt.Sprintf(
+				"%s\n%s\n%s",
+				titleStyle.Render(m.title),
+				docStyle.Render(m.output),
+				blurredStyle.Render("Press enter to continue"),
+			)
+
+			return docStyle.Render(in)
 		}
 	}
 
