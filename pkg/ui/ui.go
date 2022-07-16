@@ -339,7 +339,7 @@ func (m *UI) setMultiInputViewKeystoreFile() {
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		case 1:
-			t.Placeholder = "secret"
+			t.Placeholder = "password"
 			t.Prompt = "Password: "
 			t.EchoCharacter = '⚬'
 			t.EchoMode = textinput.EchoPassword
