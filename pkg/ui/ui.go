@@ -1,9 +1,11 @@
-package main
+package ui
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"eth-toolkit/pkg/eth"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -42,7 +44,7 @@ type UI struct {
 	choice     ListItem
 	state      string
 	inputText  string
-	walletData WalletData
+	walletData eth.WalletData
 	output     string
 	title      string
 
@@ -111,7 +113,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					gasPrice, _ := strconv.ParseFloat(m.multiInput[4].Value(), 64)
 					data := m.multiInput[5].Value()
 
-					signedTransaction := m.walletData.signTransaction(nonce, toAddress, value, gasLimit, gasPrice, data)
+					signedTransaction := m.walletData.SignTransaction(nonce, toAddress, value, gasLimit, gasPrice, data)
 
 					m.title = "Signed Transaction Hash"
 					m.output = signedTransaction
@@ -123,7 +125,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				path := m.multiInput[0].Value()
 				password := m.multiInput[1].Value()
 
-				walletData := loadKeystore(path, password)
+				walletData := eth.LoadKeystore(path, password)
 				m.walletData = walletData
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
@@ -131,21 +133,21 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			} else if m.state == "pk" {
 				privateKey := m.input.Value()
-				m.walletData = getWalletFromPK(privateKey)
+				m.walletData = eth.GetWalletFromPK(privateKey)
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
 				m.input = getText()
 				m.list.Title = m.walletData.PublicKey
 			} else if m.state == "sign_message" {
 				message := m.input.Value()
-				signedMessage := m.walletData.signMessage(message)
+				signedMessage := m.walletData.SignMessage(message)
 				m.title = "Signed Message"
 				m.output = signedMessage
 				m.setState("output")
 				m.input = getText()
 			} else if m.state == "save_keystore" {
 				password := m.input.Value()
-				keystoreFile := m.walletData.createKeystore(password)
+				keystoreFile := m.walletData.CreateKeystore(password)
 				m.title = "Keystore file saved"
 				m.output = "Path: " + keystoreFile
 				m.setState("output")
@@ -163,7 +165,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.list.SetItems(getAccessWalletItems())
 					m.list.Title = "Access Wallet"
 				case "new_wallet":
-					walletData := generateWallet()
+					walletData := eth.GenerateWallet()
 					m.walletData = walletData
 					m.setState("main")
 					m.list.SetItems(getControlWalletItems())
@@ -257,8 +259,8 @@ func getText() textinput.Model {
 	return ti
 }
 
-func getUI() UI {
-	m := UI{list: list.NewModel(getMainItems(), list.NewDefaultDelegate(), 0, 0), input: getText(), state: "main"}
+func GetUI() UI {
+	m := UI{title: "✨✨✨", list: list.NewModel(getMainItems(), list.NewDefaultDelegate(), 0, 0), input: getText(), state: "main"}
 	return m
 }
 
@@ -266,14 +268,14 @@ func (m *UI) setState(state string) {
 	m.state = state
 }
 
-func dispalWalletPublicKey(walletData WalletData) string {
+func dispalWalletPublicKey(walletData eth.WalletData) string {
 	return fmt.Sprintf(
 		"%s\n%s",
 		walletData.PublicKeyQR.ToSmallString(false),
 		"Public Key: "+walletData.PublicKey,
 	)
 }
-func displayWalletPrivateKey(walletData WalletData) string {
+func displayWalletPrivateKey(walletData eth.WalletData) string {
 	return fmt.Sprintf(
 		"%s\n%s",
 		walletData.PrivateKeyQR.ToSmallString(false),

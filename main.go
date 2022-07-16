@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"eth-toolkit/pkg/ui"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
 
-	m := getUI()
-	m.list.Title = "✨✨✨"
+	m := ui.GetUI()
 
 	p := tea.NewProgram(m)
 	p.EnterAltScreen()
