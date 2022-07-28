@@ -136,7 +136,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.walletData = eth.GetWalletFromPK(privateKey)
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
-				m.input = getText()
+				m.input = getText("Private key")
 				m.list.Title = m.walletData.PublicKey
 			} else if m.state == "sign_message" {
 				message := m.input.Value()
@@ -144,14 +144,14 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.title = "Signed Message"
 				m.output = signedMessage
 				m.setState("output")
-				m.input = getText()
+				m.input = getText("Message")
 			} else if m.state == "save_keystore" {
 				password := m.input.Value()
 				keystoreFile := m.walletData.CreateKeystore(password)
 				m.title = "Keystore file saved"
 				m.output = "Path: " + keystoreFile
 				m.setState("output")
-				m.input = getText()
+				m.input = getText("Keystore password")
 			} else if m.state == "main" || m.state == "access_wallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 
@@ -169,7 +169,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.walletData = walletData
 					m.setState("main")
 					m.list.SetItems(getControlWalletItems())
-					m.input = getText()
+					m.input = getText("")
 					m.list.Title = m.walletData.PublicKey
 				case "public_key":
 					m.output = dispalWalletPublicKey(m.walletData)
@@ -250,9 +250,9 @@ func getControlWalletItems() []list.Item {
 	return items
 }
 
-func getText() textinput.Model {
+func getText(placeHolder string) textinput.Model {
 	ti := textinput.NewModel()
-	ti.Placeholder = "Private Key"
+	ti.Placeholder = placeHolder
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = 50
@@ -260,7 +260,7 @@ func getText() textinput.Model {
 }
 
 func GetUI() UI {
-	m := UI{title: "✨✨✨", list: list.NewModel(getMainItems(), list.NewDefaultDelegate(), 0, 0), input: getText(), state: "main"}
+	m := UI{title: "✨✨✨", list: list.NewModel(getMainItems(), list.NewDefaultDelegate(), 0, 0), input: getText(""), state: "main"}
 	return m
 }
 
