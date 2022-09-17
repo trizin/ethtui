@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"eth-toolkit/pkg/eth"
+	"eth-toolkit/pkg/hd"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -41,12 +42,14 @@ type UI struct {
 	list  list.Model
 	input textinput.Model
 
-	choice     ListItem
-	state      string
-	inputText  string
-	walletData eth.WalletData
-	output     string
-	title      string
+	choice        ListItem
+	state         string
+	previousState string
+	inputText     string
+	walletData    eth.WalletData
+	output        string
+	title         string
+	hdWallet      *hd.HDWallet
 
 	multiInput []textinput.Model
 	focusIndex int
@@ -66,7 +69,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "tab", "shift+tab", "up", "down":
-			if m.state == "sign_transaction" || m.state == "keystore_access" {
+			if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "mnemonic" {
 				s := msg.String()
 
 				// Cycle indexes
@@ -138,6 +141,17 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.list.SetItems(getControlWalletItems())
 				m.input = getText("Private key")
 				m.list.Title = m.walletData.PublicKey
+			} else if m.state == "mnemonic" {
+				// words := make([]string, len(m.multiInput))
+				// for i := 0; i <= len(m.multiInput)-1; i++ {
+				// 	words[i] = m.multiInput[i].Value()
+				// }
+				// mnm := strings.Join(words, " ")
+				mnm := m.input.Value()
+				m.hdWallet = hd.NewHDWallet(mnm)
+				m.setState("hdwallet")
+				m.list.Title = "HD Wallet Addresses"
+				m.list.SetItems(getHdWalletItems(m.hdWallet))
 			} else if m.state == "sign_message" {
 				message := m.input.Value()
 				signedMessage := m.walletData.SignMessage(message)
@@ -152,6 +166,18 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.output = "Path: " + keystoreFile
 				m.setState("output")
 				m.input = getText("Keystore password")
+			} else if m.state == "hdwallet" {
+				item, ok := m.list.SelectedItem().(ListItem)
+				if ok {
+					index, _ := strconv.Atoi(item.id)
+					privateKey := m.hdWallet.GetAccount(index).PrivateKey
+					m.walletData = eth.GetWalletFromPK(privateKey)
+					m.setState("main")
+					m.list.SetItems(getControlWalletItems())
+					m.input = getText("Mnemonic")
+					m.list.Title = m.walletData.PublicKey
+				}
+
 			} else if m.state == "main" || m.state == "access_wallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 
@@ -161,6 +187,8 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setMultiInputView()
 				case "keystore_access":
 					m.setMultiInputViewKeystoreFile()
+				case "mnemonic":
+					m.title = "Mnemonic Words (seperated by space)"
 				case "access_wallet":
 					m.list.SetItems(getAccessWalletItems())
 					m.list.Title = "Access Wallet"
@@ -188,9 +216,15 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				if m.state == "quit" {
-					m.list.SetItems(getMainItems())
-					m.setState("main")
-					m.list.Title = "✨✨✨"
+					if m.hdWallet != nil {
+						m.setState("hdwallet")
+						m.list.Title = "HD Wallet Addresses"
+						m.list.SetItems(getHdWalletItems(m.hdWallet))
+					} else {
+						m.list.SetItems(getMainItems())
+						m.setState("main")
+						m.list.Title = "✨✨✨"
+					}
 				}
 
 				if ok {
@@ -206,15 +240,15 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 
-	if m.state == "main" || m.state == "access_wallet" {
+	if m.state == "main" || m.state == "access_wallet" || m.state == "hdwallet" {
 		m.list, cmd = m.list.Update(msg)
 	}
 
-	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" {
+	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" || m.state == "mnemonic" {
 		m.input, cmd = m.input.Update(msg)
 	}
 
-	if m.state == "sign_transaction" || m.state == "keystore_access" {
+	if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "mnemonic" {
 		cmd = m.updateInputs(msg)
 	}
 
@@ -231,9 +265,20 @@ func getMainItems() []list.Item {
 
 func getAccessWalletItems() []list.Item {
 	items := []list.Item{
-		ListItem{title: "Private Key", desc: "Access your wallet using your private key", id: "pk"},
-		ListItem{title: "Keystore File", desc: "Access a wallet using your keystore file", id: "keystore_access"},
+		ListItem{title: "Private Key", desc: "Access your wallet using a private key", id: "pk"},
+		ListItem{title: "Keystore File", desc: "Access your wallet using a keystore file", id: "keystore_access"},
+		ListItem{title: "Mnemonic", desc: "Access your wallet using mnemonic words", id: "mnemonic"},
 		ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"},
+	}
+	return items
+}
+
+func getHdWalletItems(wallet *hd.HDWallet) []list.Item {
+	accounts := wallet.GetAddresses(0, 100)
+	items := []list.Item{}
+	for i := 0; i <= len(accounts)-1; i++ {
+		acindex := strconv.Itoa(accounts[i].Index)
+		items = append(items, ListItem{title: fmt.Sprintf("%s. %s", acindex, accounts[i].Address), id: acindex})
 	}
 	return items
 }
@@ -265,6 +310,7 @@ func GetUI() UI {
 }
 
 func (m *UI) setState(state string) {
+	m.previousState = m.state
 	m.state = state
 }
 
@@ -348,6 +394,26 @@ func (m *UI) setMultiInputViewKeystoreFile() {
 		m.multiInput[i] = t
 	}
 }
+func (m *UI) setMultiInputViewMnemonic() {
+	m.multiInput = make([]textinput.Model, 12)
+
+	var t textinput.Model
+	for i := range m.multiInput {
+		t = textinput.NewModel()
+		t.CursorStyle = cursorStyle
+
+		t.Prompt = "Mnemonic Word " + strconv.Itoa(i+1) + ": "
+		t.Placeholder = "word"
+		if i == 0 {
+
+			t.Focus()
+			t.PromptStyle = focusedStyle
+			t.TextStyle = focusedStyle
+		}
+
+		m.multiInput[i] = t
+	}
+}
 
 func (m *UI) updateInputs(msg tea.Msg) tea.Cmd {
 	var cmds = make([]tea.Cmd, len(m.multiInput))
@@ -400,7 +466,7 @@ func (m UI) View() string {
 
 			return b.String()
 
-		case "save_keystore", "pk", "sign_message":
+		case "save_keystore", "pk", "sign_message", "mnemonic":
 			return docStyle.Render(fmt.Sprintf(
 				"%s\n%s\n%s",
 				titleStyle.Render(m.title),
