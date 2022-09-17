@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 )
 
 type ListItem struct {
@@ -207,6 +208,10 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.output = displayWalletPrivateKey(m.walletData)
 					m.title = "Private Key"
 					m.setState("output")
+				case "new_hd_wallet":
+					m.output, _ = hdwallet.NewMnemonic(128)
+					m.title = "Mnemonic Words (seperated by space)"
+					m.setState("output")
 				case "pk":
 					m.title = "Private Key"
 				case "sign_message":
@@ -258,6 +263,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func getMainItems() []list.Item {
 	items := []list.Item{
 		ListItem{title: "New Wallet", desc: "Create a new wallet", id: "new_wallet"},
+		ListItem{title: "New HD Wallet", desc: "Create a new HD wallet", id: "new_hd_wallet"},
 		ListItem{title: "Access Wallet", desc: "Access an existing wallet", id: "access_wallet"},
 	}
 	return items
@@ -274,7 +280,7 @@ func getAccessWalletItems() []list.Item {
 }
 
 func getHdWalletItems(wallet *hd.HDWallet) []list.Item {
-	accounts := wallet.GetAddresses(0, 100)
+	accounts := wallet.GetAddresses(0, 1000)
 	items := []list.Item{}
 	for i := 0; i <= len(accounts)-1; i++ {
 		acindex := strconv.Itoa(accounts[i].Index)
