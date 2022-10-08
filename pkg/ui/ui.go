@@ -107,7 +107,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if m.state == "new_wallet" || m.state == "get_info_wallet" || m.state == "output" {
 				m.setState("main")
-			} else if m.state == "new_hd_wallet_output"{
+			} else if m.state == "new_hd_wallet_output" {
 				mnm := m.output
 				m.output = ""
 				m.hdWallet = hd.NewHDWallet(mnm)
@@ -143,6 +143,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			} else if m.state == "pk" {
 				privateKey := m.input.Value()
+				m.input.SetValue("")
 				m.walletData = eth.GetWalletFromPK(privateKey)
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
@@ -154,6 +155,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// }
 				// mnm := strings.Join(words, " ")
 				mnm := m.input.Value()
+				m.input.SetValue("")
 				m.hdWallet = hd.NewHDWallet(mnm)
 				m.setState("hdwallet")
 				m.list.Title = "HD Wallet Addresses"
@@ -173,12 +175,19 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if m.state == "hdwallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 				if ok {
-					index, _ := strconv.Atoi(item.id)
-					privateKey := m.hdWallet.GetAccount(index).PrivateKey
-					m.walletData = eth.GetWalletFromPK(privateKey)
-					m.setState("main")
-					m.list.SetItems(getControlWalletItems())
-					m.list.Title = m.walletData.PublicKey
+					if item.id == "quit" {
+						m.list.SetItems(getMainItems())
+						m.setState("main")
+						m.list.Title = "✨✨✨"
+						m.hdWallet = nil
+					} else {
+						index, _ := strconv.Atoi(item.id)
+						privateKey := m.hdWallet.GetAccount(index).PrivateKey
+						m.walletData = eth.GetWalletFromPK(privateKey)
+						m.setState("main")
+						m.list.SetItems(getControlWalletItems())
+						m.list.Title = m.walletData.PublicKey
+					}
 				}
 
 			} else if m.state == "main" || m.state == "access_wallet" {
@@ -246,6 +255,8 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		top, right, bottom, left := docStyle.GetMargin()
 		m.list.SetSize(msg.Width-left-right, msg.Height-top-bottom)
+		docStyle.Width(msg.Width)
+		m.input.Width = int(float64(msg.Width*5) / 6)
 	}
 
 	var cmd tea.Cmd
@@ -286,7 +297,7 @@ func getAccessWalletItems() []list.Item {
 
 func getHdWalletItems(wallet *hd.HDWallet) []list.Item {
 	accounts := wallet.GetAddresses(0, 1000)
-	items := []list.Item{}
+	items := []list.Item{ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"}}
 	for i := 0; i <= len(accounts)-1; i++ {
 		acindex := strconv.Itoa(accounts[i].Index)
 		items = append(items, ListItem{title: fmt.Sprintf("%s. %s", acindex, accounts[i].Address), id: acindex})
@@ -310,8 +321,6 @@ func getText(placeHolder string) textinput.Model {
 	ti := textinput.NewModel()
 	ti.Placeholder = placeHolder
 	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = 50
 	return ti
 }
 
@@ -322,7 +331,7 @@ func GetUI() UI {
 }
 
 func (m *UI) setState(state string) {
-	if(state == "output"){
+	if state == "output" {
 		m.input = getText("")
 	}
 	m.previousState = m.state
@@ -409,26 +418,6 @@ func (m *UI) setMultiInputViewKeystoreFile() {
 		m.multiInput[i] = t
 	}
 }
-func (m *UI) setMultiInputViewMnemonic() {
-	m.multiInput = make([]textinput.Model, 12)
-
-	var t textinput.Model
-	for i := range m.multiInput {
-		t = textinput.NewModel()
-		t.CursorStyle = cursorStyle
-
-		t.Prompt = "Mnemonic Word " + strconv.Itoa(i+1) + ": "
-		t.Placeholder = "word"
-		if i == 0 {
-
-			t.Focus()
-			t.PromptStyle = focusedStyle
-			t.TextStyle = focusedStyle
-		}
-
-		m.multiInput[i] = t
-	}
-}
 
 func (m *UI) updateInputs(msg tea.Msg) tea.Cmd {
 	var cmds = make([]tea.Cmd, len(m.multiInput))
@@ -462,7 +451,12 @@ func (m UI) View() string {
 			}
 			fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 
-			return b.String()
+			return docStyle.Render(
+				fmt.Sprintf(
+					"%s\n\n%s",
+					"Sign Transaction",
+					b.String(),
+				))
 
 		case "keystore_access":
 			var b strings.Builder
