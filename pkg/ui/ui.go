@@ -31,7 +31,6 @@ type UI struct {
 	choice        ListItem
 	state         string
 	previousState string
-	inputText     string
 	walletData    eth.WalletData
 	output        string
 	title         string
