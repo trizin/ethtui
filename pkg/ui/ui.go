@@ -143,6 +143,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			} else if m.state == "pk" {
 				privateKey := m.input.Value()
+				m.input.SetValue("")
 				m.walletData = eth.GetWalletFromPK(privateKey)
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
@@ -154,6 +155,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// }
 				// mnm := strings.Join(words, " ")
 				mnm := m.input.Value()
+				m.input.SetValue("")
 				m.hdWallet = hd.NewHDWallet(mnm)
 				m.setState("hdwallet")
 				m.list.Title = "HD Wallet Addresses"
@@ -450,7 +452,12 @@ func (m UI) View() string {
 			}
 			fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 
-			return b.String()
+			return docStyle.Render(
+				fmt.Sprintf(
+					"%s\n\n%s",
+					"Sign Transaction",
+					b.String(),
+				))
 
 		case "keystore_access":
 			var b strings.Builder
