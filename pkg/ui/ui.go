@@ -417,26 +417,6 @@ func (m *UI) setMultiInputViewKeystoreFile() {
 		m.multiInput[i] = t
 	}
 }
-func (m *UI) setMultiInputViewMnemonic() {
-	m.multiInput = make([]textinput.Model, 12)
-
-	var t textinput.Model
-	for i := range m.multiInput {
-		t = textinput.NewModel()
-		t.CursorStyle = cursorStyle
-
-		t.Prompt = "Mnemonic Word " + strconv.Itoa(i+1) + ": "
-		t.Placeholder = "word"
-		if i == 0 {
-
-			t.Focus()
-			t.PromptStyle = focusedStyle
-			t.TextStyle = focusedStyle
-		}
-
-		m.multiInput[i] = t
-	}
-}
 
 func (m *UI) updateInputs(msg tea.Msg) tea.Cmd {
 	var cmds = make([]tea.Cmd, len(m.multiInput))
