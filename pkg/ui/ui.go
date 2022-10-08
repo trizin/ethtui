@@ -55,6 +55,12 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 
+		case "ctrl+p":
+			if m.state == "main" {
+				m.setState("update_provider")
+				m.input = getText("Enter provider URL")
+				m.title = "Set Provider"
+			}
 		case "tab", "shift+tab", "up", "down":
 			if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "mnemonic" {
 				s := msg.String()
