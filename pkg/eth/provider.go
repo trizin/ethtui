@@ -2,11 +2,14 @@ package eth
 
 import (
 	"context"
+	"encoding/hex"
 	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 type Provider struct {
@@ -19,6 +22,20 @@ func GetProvider(url string) *Provider {
 		panic(err)
 	}
 	return &Provider{client}
+}
+
+func (p Provider) SendSignedTransaction(signedhash string) (string, error) {
+	rawTx, err := hex.DecodeString(signedhash)
+	if err != nil {
+		return "", err
+	}
+	tx := new(types.Transaction)
+	rlp.DecodeBytes(rawTx, &tx)
+	err = p.Client.SendTransaction(context.Background(), tx)
+	if err != nil {
+		return "", err
+	}
+	return tx.Hash().String(), nil
 }
 
 func (p Provider) GetBalance(address string, blockNumber int64) *big.Int {
