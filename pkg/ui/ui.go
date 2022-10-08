@@ -107,7 +107,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if m.state == "new_wallet" || m.state == "get_info_wallet" || m.state == "output" {
 				m.setState("main")
-			} else if m.state == "new_hd_wallet_output"{
+			} else if m.state == "new_hd_wallet_output" {
 				mnm := m.output
 				m.output = ""
 				m.hdWallet = hd.NewHDWallet(mnm)
@@ -173,12 +173,19 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if m.state == "hdwallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 				if ok {
-					index, _ := strconv.Atoi(item.id)
-					privateKey := m.hdWallet.GetAccount(index).PrivateKey
-					m.walletData = eth.GetWalletFromPK(privateKey)
-					m.setState("main")
-					m.list.SetItems(getControlWalletItems())
-					m.list.Title = m.walletData.PublicKey
+					if item.id == "quit" {
+						m.list.SetItems(getMainItems())
+						m.setState("main")
+						m.list.Title = "✨✨✨"
+						m.hdWallet = nil
+					} else {
+						index, _ := strconv.Atoi(item.id)
+						privateKey := m.hdWallet.GetAccount(index).PrivateKey
+						m.walletData = eth.GetWalletFromPK(privateKey)
+						m.setState("main")
+						m.list.SetItems(getControlWalletItems())
+						m.list.Title = m.walletData.PublicKey
+					}
 				}
 
 			} else if m.state == "main" || m.state == "access_wallet" {
@@ -287,7 +294,7 @@ func getAccessWalletItems() []list.Item {
 
 func getHdWalletItems(wallet *hd.HDWallet) []list.Item {
 	accounts := wallet.GetAddresses(0, 1000)
-	items := []list.Item{}
+	items := []list.Item{ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"}}
 	for i := 0; i <= len(accounts)-1; i++ {
 		acindex := strconv.Itoa(accounts[i].Index)
 		items = append(items, ListItem{title: fmt.Sprintf("%s. %s", acindex, accounts[i].Address), id: acindex})
@@ -323,7 +330,7 @@ func GetUI() UI {
 }
 
 func (m *UI) setState(state string) {
-	if(state == "output"){
+	if state == "output" {
 		m.input = getText("")
 	}
 	m.previousState = m.state
