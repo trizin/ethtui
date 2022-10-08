@@ -25,20 +25,6 @@ func (i ListItem) Title() string       { return i.title }
 func (i ListItem) Description() string { return i.desc }
 func (i ListItem) FilterValue() string { return i.title }
 
-var (
-	docStyle            = lipgloss.NewStyle().Margin(1, 2)
-	focusedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	blurredStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Italic(true)
-	cursorStyle         = focusedStyle.Copy()
-	noStyle             = lipgloss.NewStyle()
-	helpStyle           = blurredStyle.Copy()
-	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
-	titleStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("#9763e6")).Bold(true)
-
-	focusedButton = focusedStyle.Copy().Render("[ Submit ]")
-	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
-)
-
 type UI struct {
 	list  list.Model
 	input textinput.Model
@@ -51,6 +37,7 @@ type UI struct {
 	output        string
 	title         string
 	hdWallet      *hd.HDWallet
+	provider      *eth.Provider
 
 	multiInput []textinput.Model
 	focusIndex int
