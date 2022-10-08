@@ -105,9 +105,15 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "enter":
-
 			if m.state == "new_wallet" || m.state == "get_info_wallet" || m.state == "output" {
 				m.setState("main")
+			} else if m.state == "new_hd_wallet_output"{
+				mnm := m.output
+				m.output = ""
+				m.hdWallet = hd.NewHDWallet(mnm)
+				m.setState("hdwallet")
+				m.list.Title = "HD Wallet Addresses"
+				m.list.SetItems(getHdWalletItems(m.hdWallet))
 			} else if m.state == "sign_transaction" {
 				if m.focusIndex == len(m.multiInput) {
 					nonce, _ := strconv.Atoi(m.multiInput[0].Value())
@@ -210,8 +216,8 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setState("output")
 				case "new_hd_wallet":
 					m.output, _ = hdwallet.NewMnemonic(128)
-					m.title = "Mnemonic Words (seperated by space)"
-					m.setState("output")
+					m.title = "Mnemonic Words (seperated by space), SAVE IT somewhere safe"
+					m.setState("new_hd_wallet_output")
 				case "pk":
 					m.title = "Private Key"
 				case "sign_message":
@@ -480,7 +486,7 @@ func (m UI) View() string {
 				blurredStyle.Render("Press ctrl+c to quit"),
 			))
 
-		case "output":
+		case "output", "new_hd_wallet_output":
 			in := fmt.Sprintf(
 				"%s\n%s\n%s",
 				titleStyle.Render(m.title),
