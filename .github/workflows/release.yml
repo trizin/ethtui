@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v-*'
+
+jobs:
+  build:
+    name: Build Release
+    strategy:
+      matrix:
+        go-version: [1.18.x]
+        os: [ubuntu-latest, macos-11, windows-2019]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - uses: actions/cache@v2
+        with:
+          # In order:
+          # * Module download cache
+          # * Build cache (Linux)
+          # * Build cache (Mac)
+          # * Build cache (Windows)
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            %LocalAppData%\go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      # ==============================
+      #       Linux/Macos/Windows Build
+      # ==============================
+
+      - name: Build Binary for ${{matrix.os}}
+        run: go build .
+
+      # ==============================
+      #       Upload artifacts
+      # ==============================
+
+      - name: Upload Linux Build
+        uses: actions/upload-artifact@v2
+        if: matrix.os == 'ubuntu-18.04'
+        with:
+          name: linux
+          path: ./eth-toolkit
+
+      - name: Upload MacOS Build
+        uses: actions/upload-artifact@v2
+        if: matrix.os == 'macos-11'
+        with:
+          name: macos
+          path: ./eth-toolkit
+      
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v2
+        if: matrix.os == 'windows-2019'
+        with:
+          name: windows
+          path: ./eth-toolkit.exe
+  
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Download artifacts
+
+      - name: Download Linux Build
+        uses: actions/download-artifact@v2
+        with:
+          name: linux
+          path: ./linux
+      
+      - name: Download MacOS Build
+        uses: actions/download-artifact@v2
+        with:
+          name: macos
+          path: ./macos
+    
+
+      - name: Download Windows Build
+        uses: actions/download-artifact@v2
+        with:
+          name: windows
+          path: ./windows
+
+
+      # Create release
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      
+      # Upload artifacts
+      - name: Upload Linux Build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./linux/eth-toolkit
+          asset_name: eth-toolkit-linux
+          asset_content_type: application/octet-stream
+      
+      - name: Upload MacOS Build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./macos/eth-toolkit
+          asset_name: eth-toolkit-macos
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows/eth-toolkit.exe
+          asset_name: eth-toolkit-windows.exe
+          asset_content_type: application/octet-stream
