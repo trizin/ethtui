@@ -66,3 +66,50 @@ func TestGetTransactionReceipt(t *testing.T) {
 		t.Errorf("Provider.GetTransactionReceipt() gas used = %v", receipt.GasUsed)
 	}
 }
+
+func TestGetTransactionInfo(t *testing.T) {
+	provider := GetProvider(rpcUrl)
+	txHash := "0x82237a9d319cbb9a46d1bbbdbac870918e70ae9f0350db24dc578c1a5cf4d859"
+
+	tx, pending, err := provider.GetTransactionInfo(txHash)
+
+	if err != nil {
+		t.Errorf("Provider.GetTransactionInfo() error = %v", err)
+	}
+
+	if pending != false {
+		t.Errorf("Provider.GetTransactionInfo() success = %v", pending)
+	}
+
+	if tx == nil {
+		t.Errorf("Provider.GetTransactionInfo() tx = %v", tx)
+	}
+
+	if tx.Hash().String() != txHash {
+		t.Errorf("Provider.GetTransactionInfo() hash = %v", tx.Hash().String())
+	}
+
+	if tx.Value().Cmp(big.NewInt(53146227074366)) != 0 {
+		t.Errorf("Provider.GetTransactionInfo() value = %v", tx.Value())
+	}
+
+	if tx.Gas() != 21000 {
+		t.Errorf("Provider.GetTransactionInfo() gas = %v", tx.Gas())
+	}
+
+	if tx.GasPrice().Cmp(big.NewInt(5664994449)) != 0 {
+		t.Errorf("Provider.GetTransactionInfo() gas price = %v", tx.GasPrice())
+	}
+
+	if tx.Nonce() != 21 {
+		t.Errorf("Provider.GetTransactionInfo() nonce = %v", tx.Nonce())
+	}
+
+	if tx.To().String() != "0x000000000000000000000000000000000000dEaD" {
+		t.Errorf("Provider.GetTransactionInfo() to = %v", tx.To().String())
+	}
+
+	if tx.Data() == nil {
+		t.Errorf("Provider.GetTransactionInfo() data = %v", tx.Data())
+	}
+}
