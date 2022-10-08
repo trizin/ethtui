@@ -3,7 +3,6 @@ package eth
 import (
 	"context"
 	"encoding/hex"
-	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -55,12 +54,4 @@ func (p Provider) GetBalance(address string, blockNumber uint64) *big.Int {
 	}
 
 	return bal
-}
-
-func GetEthValue(wei *big.Int) float64 {
-	fbalance := new(big.Float)
-	fbalance.SetString(wei.String())
-	ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(18)))
-	val, _ := ethValue.Float64()
-	return val
 }
