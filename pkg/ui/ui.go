@@ -146,7 +146,6 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.walletData = eth.GetWalletFromPK(privateKey)
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems())
-				m.input = getText("Private key")
 				m.list.Title = m.walletData.PublicKey
 			} else if m.state == "mnemonic" {
 				// words := make([]string, len(m.multiInput))
@@ -165,14 +164,12 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.title = "Signed Message"
 				m.output = signedMessage
 				m.setState("output")
-				m.input = getText("Message")
 			} else if m.state == "save_keystore" {
 				password := m.input.Value()
 				keystoreFile := m.walletData.CreateKeystore(password)
 				m.title = "Keystore file saved"
 				m.output = "Path: " + keystoreFile
 				m.setState("output")
-				m.input = getText("Keystore password")
 			} else if m.state == "hdwallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 				if ok {
@@ -181,7 +178,6 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.walletData = eth.GetWalletFromPK(privateKey)
 					m.setState("main")
 					m.list.SetItems(getControlWalletItems())
-					m.input = getText("Mnemonic")
 					m.list.Title = m.walletData.PublicKey
 				}
 
@@ -220,10 +216,13 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setState("new_hd_wallet_output")
 				case "pk":
 					m.title = "Private Key"
+					m.input = getText("Private key")
 				case "sign_message":
 					m.title = "Message to sign"
+					m.input = getText("Message")
 				case "save_keystore":
 					m.title = "Keystore Password"
+					m.input = getText("Password")
 				}
 
 				if m.state == "quit" {
@@ -322,6 +321,9 @@ func GetUI() UI {
 }
 
 func (m *UI) setState(state string) {
+	if(state == "output"){
+		m.input = getText("")
+	}
 	m.previousState = m.state
 	m.state = state
 }
