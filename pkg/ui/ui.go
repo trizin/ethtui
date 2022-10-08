@@ -46,6 +46,10 @@ func (m UI) Init() tea.Cmd {
 	return nil
 }
 
+func (m *UI) setListTitle(title string) {
+	m.list.Title = title
+}
+
 func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
@@ -61,6 +65,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.input = getText("Enter provider URL")
 				m.title = "Set Provider"
 			}
+
 		case "tab", "shift+tab", "up", "down":
 			if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "mnemonic" {
 				s := msg.String()
@@ -104,7 +109,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.output = ""
 				m.hdWallet = hd.NewHDWallet(mnm)
 				m.setState("hdwallet")
-				m.list.Title = "HD Wallet Addresses"
+				m.setListTitle("HD Wallet Addresses")
 				m.list.SetItems(getHdWalletItems(m.hdWallet))
 			} else if m.state == "sign_transaction" {
 				if m.focusIndex == len(m.multiInput) {
@@ -130,16 +135,16 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				walletData := eth.LoadKeystore(path, password)
 				m.walletData = walletData
 				m.setState("main")
-				m.list.SetItems(getControlWalletItems())
-				m.list.Title = m.walletData.PublicKey
+				m.list.SetItems(getControlWalletItems(m))
+				m.setListTitle(m.walletData.PublicKey)
 
 			} else if m.state == "pk" {
 				privateKey := m.input.Value()
 				m.input.SetValue("")
 				m.walletData = eth.GetWalletFromPK(privateKey)
 				m.setState("main")
-				m.list.SetItems(getControlWalletItems())
-				m.list.Title = m.walletData.PublicKey
+				m.list.SetItems(getControlWalletItems(m))
+				m.setListTitle(m.walletData.PublicKey)
 			} else if m.state == "mnemonic" {
 				// words := make([]string, len(m.multiInput))
 				// for i := 0; i <= len(m.multiInput)-1; i++ {
@@ -150,7 +155,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.input.SetValue("")
 				m.hdWallet = hd.NewHDWallet(mnm)
 				m.setState("hdwallet")
-				m.list.Title = "HD Wallet Addresses"
+				m.setListTitle("HD Wallet Addresses")
 				m.list.SetItems(getHdWalletItems(m.hdWallet))
 			} else if m.state == "sign_message" {
 				message := m.input.Value()
@@ -158,6 +163,16 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.title = "Signed Message"
 				m.output = signedMessage
 				m.setState("output")
+			} else if m.state == "send_tx" {
+				signedTx := m.input.Value()
+				txHash, err := m.provider.SendSignedTransaction(signedTx)
+				if err != nil {
+					m.output = fmt.Sprintf("Error: %s", err)
+				} else {
+					m.output = fmt.Sprintf("Transaction hash: %s", txHash)
+				}
+				m.setState("output")
+				m.title = "Send Transaction"
 			} else if m.state == "save_keystore" {
 				password := m.input.Value()
 				keystoreFile := m.walletData.CreateKeystore(password)
@@ -170,15 +185,15 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if item.id == "quit" {
 						m.list.SetItems(getMainItems())
 						m.setState("main")
-						m.list.Title = "✨✨✨"
+						m.setListTitle("✨✨✨")
 						m.hdWallet = nil
 					} else {
 						index, _ := strconv.Atoi(item.id)
 						privateKey := m.hdWallet.GetAccount(index).PrivateKey
 						m.walletData = eth.GetWalletFromPK(privateKey)
 						m.setState("main")
-						m.list.SetItems(getControlWalletItems())
-						m.list.Title = m.walletData.PublicKey
+						m.list.SetItems(getControlWalletItems(m))
+						m.setListTitle(m.walletData.PublicKey)
 					}
 				}
 
@@ -195,14 +210,14 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.title = "Mnemonic Words (seperated by space)"
 				case "access_wallet":
 					m.list.SetItems(getAccessWalletItems())
-					m.list.Title = "Access Wallet"
+					m.setListTitle("Access Wallet")
 				case "new_wallet":
 					walletData := eth.GenerateWallet()
 					m.walletData = walletData
 					m.setState("main")
-					m.list.SetItems(getControlWalletItems())
+					m.list.SetItems(getControlWalletItems(m))
 					m.input = getText("")
-					m.list.Title = m.walletData.PublicKey
+					m.setListTitle(m.walletData.PublicKey)
 				case "public_key":
 					m.output = dispalWalletPublicKey(m.walletData)
 					m.title = "Public Key"
@@ -242,18 +257,23 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.state == "quit" {
 					if m.hdWallet != nil {
 						m.setState("hdwallet")
-						m.list.Title = "HD Wallet Addresses"
+						m.setListTitle("HD Wallet Addresses")
 						m.list.SetItems(getHdWalletItems(m.hdWallet))
 					} else {
 						m.list.SetItems(getMainItems())
 						m.setState("main")
-						m.list.Title = "✨✨✨"
+						m.setListTitle("✨✨✨")
 					}
 				}
 
 				if ok {
 					m.choice = item
 				}
+			} else if m.state == "update_provider" {
+				m.provider = eth.GetProvider(m.input.Value())
+				m.setState(m.previousState)
+				m.input.SetValue("")
+				m.list.SetItems(getControlWalletItems(m))
 			}
 		}
 
@@ -270,7 +290,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list, cmd = m.list.Update(msg)
 	}
 
-	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" || m.state == "mnemonic" {
+	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" || m.state == "mnemonic" || m.state == "update_provider" || m.state == "send_tx" {
 		m.input, cmd = m.input.Update(msg)
 	}
 
@@ -310,15 +330,29 @@ func getHdWalletItems(wallet *hd.HDWallet) []list.Item {
 	return items
 }
 
-func getControlWalletItems() []list.Item {
+func getProviderItems(m UI) []list.Item {
 	items := []list.Item{
-		ListItem{title: "Public Key", desc: "Display public key and QR", id: "public_key"},
+		ListItem{title: "Wallet Balance", desc: "Query the balance of active wallet", id: "account_bal"},
+		ListItem{title: "Send Transaction", desc: "Send a transaction", id: "send_tx"},
+		ListItem{title: "Query Balance", desc: "Query balance of an address", id: "query_bal"},
+	}
+	return items
+}
+
+func getControlWalletItems(m UI) []list.Item {
+
+	items := []list.Item{}
+
+	if m.provider != nil {
+		items = append(items, ListItem{title: "Provider", desc: "Query chain", id: "provider_options"})
+	}
+
+	items = append(items, ListItem{title: "Public Key", desc: "Display public key and QR", id: "public_key"},
 		ListItem{title: "Private Key", desc: "Display private key and QR", id: "private_key"},
 		ListItem{title: "Save Keystore", desc: "Save the wallet to a keystore file", id: "save_keystore"},
 		ListItem{title: "Sign Message", desc: "Sign a message with the private key", id: "sign_message"},
 		ListItem{title: "Sign Transaction", desc: "Sign a transaction with the private key", id: "sign_transaction"},
-		ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"},
-	}
+		ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"})
 	return items
 }
 
@@ -480,7 +514,7 @@ func (m UI) View() string {
 
 			return b.String()
 
-		case "save_keystore", "pk", "sign_message", "mnemonic":
+		case "save_keystore", "pk", "sign_message", "mnemonic", "update_provider", "send_tx":
 			return docStyle.Render(fmt.Sprintf(
 				"%s\n%s\n%s",
 				titleStyle.Render(m.title),
