@@ -210,7 +210,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setState("output")
 				case "new_hd_wallet":
 					m.output, _ = hdwallet.NewMnemonic(128)
-					m.title = "Mnemonic Words (seperated by space)"
+					m.title = "Mnemonic Words (seperated by space), SAVE IT somewhere safe"
 					m.setState("output")
 				case "pk":
 					m.title = "Private Key"
