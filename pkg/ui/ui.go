@@ -110,6 +110,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.setState("hdwallet")
 				m.setListTitle("HD Wallet Addresses")
 				m.list.SetItems(getHdWalletItems(m.hdWallet))
+				m.resetListCursor()
 			} else if m.state == "sign_transaction" {
 				if m.focusIndex == len(m.multiInput) {
 					nonce, _ := strconv.Atoi(m.multiInput[0].Value())
@@ -135,6 +136,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.walletData = walletData
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems(m))
+				m.resetListCursor()
 				m.setListTitle(m.walletData.PublicKey)
 
 			} else if m.state == "pk" {
@@ -143,6 +145,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.walletData = eth.GetWalletFromPK(privateKey)
 				m.setState("main")
 				m.list.SetItems(getControlWalletItems(m))
+				m.resetListCursor()
 				m.setListTitle(m.walletData.PublicKey)
 			} else if m.state == "mnemonic" {
 				// words := make([]string, len(m.multiInput))
@@ -156,6 +159,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.setState("hdwallet")
 				m.setListTitle("HD Wallet Addresses")
 				m.list.SetItems(getHdWalletItems(m.hdWallet))
+				m.resetListCursor()
 			} else if m.state == "sign_message" {
 				message := m.input.Value()
 				signedMessage := m.walletData.SignMessage(message)
@@ -191,6 +195,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if ok {
 					if item.id == "quit" {
 						m.list.SetItems(getMainItems())
+						m.resetListCursor()
 						m.setState("main")
 						m.setListTitle("✨✨✨")
 						m.hdWallet = nil
@@ -200,6 +205,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						m.walletData = eth.GetWalletFromPK(privateKey)
 						m.setState("main")
 						m.list.SetItems(getControlWalletItems(m))
+						m.resetListCursor()
 						m.setListTitle(m.walletData.PublicKey)
 					}
 				}
@@ -217,12 +223,14 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.title = "Mnemonic Words (seperated by space)"
 				case "access_wallet":
 					m.list.SetItems(getAccessWalletItems())
+					m.resetListCursor()
 					m.setListTitle("Access Wallet")
 				case "new_wallet":
 					walletData := eth.GenerateWallet()
 					m.walletData = walletData
 					m.setState("main")
 					m.list.SetItems(getControlWalletItems(m))
+					m.resetListCursor()
 					m.input = getText("")
 					m.setListTitle(m.walletData.PublicKey)
 				case "public_key":
@@ -249,6 +257,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "provider_options":
 					m.title = "Query Chain"
 					m.list.SetItems(getProviderItems(m))
+					m.resetListCursor()
 					m.setState("main")
 				case "account_bal":
 					m.title = "Account Balance"
@@ -266,10 +275,12 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "back":
 					m.setState("main")
 					m.list.SetItems(getControlWalletItems(m))
+					m.resetListCursor()
 				}
 
 				if m.state == "quit" {
 					m.list.SetItems(getMainItems())
+					m.resetListCursor()
 					m.setState("main")
 					m.setListTitle("✨✨✨")
 				}
@@ -282,6 +293,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.setState("main")
 				m.input.SetValue("")
 				m.list.SetItems(getControlWalletItems(m))
+				m.resetListCursor()
 			}
 		}
 
@@ -348,8 +360,11 @@ func getProviderItems(m UI) []list.Item {
 	return items
 }
 
-func getControlWalletItems(m UI) []list.Item {
+func (m *UI) resetListCursor() {
+	m.list.Select(0)
+}
 
+func getControlWalletItems(m UI) []list.Item {
 	items := []list.Item{}
 
 	if m.provider != nil {
