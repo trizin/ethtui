@@ -173,6 +173,14 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.setState("output")
 				m.title = "Send Transaction"
+			} else if m.state == "query_bal" {
+				addr := m.input.Value()
+				m.title = "Account Balance"
+				balance := m.provider.GetBalance(addr, 0)
+				eth_value := eth.GetEthValue(balance)
+				m.output = fmt.Sprintf("Balance is: %v", eth_value)
+				m.setState("output")
+
 			} else if m.state == "save_keystore" {
 				password := m.input.Value()
 				keystoreFile := m.walletData.CreateKeystore(password)
@@ -246,8 +254,13 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "account_bal":
 					m.title = "Account Balance"
 					balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
-					m.output = fmt.Sprintf("Balance is: %v", balance)
+					eth_value := eth.GetEthValue(balance)
+					m.output = fmt.Sprintf("Balance is: %v", eth_value)
 					m.setState("output")
+				case "query_bal":
+					m.title = "Query Balance"
+					m.input = getText("Address")
+
 				case "send_tx":
 					m.title = "Send Transaction"
 					m.input = getText("Signed Transaction Hash")
@@ -290,7 +303,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list, cmd = m.list.Update(msg)
 	}
 
-	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" || m.state == "mnemonic" || m.state == "update_provider" || m.state == "send_tx" {
+	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" || m.state == "mnemonic" || m.state == "update_provider" || m.state == "send_tx" || m.state == "query_bal" {
 		m.input, cmd = m.input.Update(msg)
 	}
 
@@ -514,7 +527,7 @@ func (m UI) View() string {
 
 			return b.String()
 
-		case "save_keystore", "pk", "sign_message", "mnemonic", "update_provider", "send_tx":
+		case "save_keystore", "pk", "sign_message", "mnemonic", "update_provider", "send_tx", "query_bal":
 			return docStyle.Render(fmt.Sprintf(
 				"%s\n%s\n%s",
 				titleStyle.Render(m.title),
