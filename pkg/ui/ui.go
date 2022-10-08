@@ -224,6 +224,19 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "save_keystore":
 					m.title = "Keystore Password"
 					m.input = getText("Password")
+				case "provider_options":
+					m.title = "Query Chain"
+					m.list.SetItems(getProviderItems(m))
+					m.setState("main")
+				case "account_bal":
+					m.title = "Account Balance"
+					balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
+					m.output = fmt.Sprintf("Balance is: %v", balance)
+					m.setState("output")
+				case "send_tx":
+					m.title = "Send Transaction"
+					m.input = getText("Signed Transaction Hash")
+
 				}
 
 				if m.state == "quit" {
