@@ -11,7 +11,6 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 )
 
