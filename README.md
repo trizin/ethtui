@@ -1,6 +1,9 @@
-# Crypto Wallet Toolkit
+# ETH Wallet Toolkit
 
-A small project I've been working on to understand Golang & Ethereum.
+CLI toolkit to easily create & manage Ethereum wallets, written in Go. 
+
+The project is still a work in progress, but the basic features are complete. It's designed to be easy to use, and as simple as possible.
+
 
 ## Installation
 
