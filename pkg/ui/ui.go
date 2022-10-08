@@ -265,7 +265,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.input = getText("Signed Transaction Hash")
 				case "back":
 					m.setState("main")
-					m.list.SetItems(getControlWalletItems())
+					m.list.SetItems(getControlWalletItems(m))
 				}
 
 				if m.state == "quit" {
