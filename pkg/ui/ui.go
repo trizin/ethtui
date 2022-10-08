@@ -246,6 +246,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		top, right, bottom, left := docStyle.GetMargin()
 		m.list.SetSize(msg.Width-left-right, msg.Height-top-bottom)
+		docStyle.Width(msg.Width)
 	}
 
 	var cmd tea.Cmd
