@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"math/big"
 	"testing"
 )
 
@@ -13,8 +14,13 @@ func TestProvider_GetBalance(t *testing.T) {
 		expected := "12567984693887489302095"
 		got := provider.GetBalance(addr, 15705799).String()
 		if got != expected {
-			t.Errorf("Provider.GetBalance() = %v, want %v", got, expected)
+			t.Errorf("Provider.GetBalance() at block = %v, want %v", got, expected)
 		}
 	})
-
+	t.Run("Get last balance", func(t *testing.T) {
+		got := provider.GetBalance(addr, 0)
+		if got.Cmp(big.NewInt(0)) != 1 {
+			t.Errorf("Provider.GetBalance() last balance failed")
+		}
+	})
 }
