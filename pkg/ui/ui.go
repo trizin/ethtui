@@ -263,19 +263,15 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "send_tx":
 					m.title = "Send Transaction"
 					m.input = getText("Signed Transaction Hash")
-
+				case "back":
+					m.setState("main")
+					m.list.SetItems(getControlWalletItems())
 				}
 
 				if m.state == "quit" {
-					if m.hdWallet != nil {
-						m.setState("hdwallet")
-						m.setListTitle("HD Wallet Addresses")
-						m.list.SetItems(getHdWalletItems(m.hdWallet))
-					} else {
-						m.list.SetItems(getMainItems())
-						m.setState("main")
-						m.setListTitle("✨✨✨")
-					}
+					m.list.SetItems(getMainItems())
+					m.setState("main")
+					m.setListTitle("✨✨✨")
 				}
 
 				if ok {
@@ -283,7 +279,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			} else if m.state == "update_provider" {
 				m.provider = eth.GetProvider(m.input.Value())
-				m.setState(m.previousState)
+				m.setState("main")
 				m.input.SetValue("")
 				m.list.SetItems(getControlWalletItems(m))
 			}
@@ -347,6 +343,7 @@ func getProviderItems(m UI) []list.Item {
 		ListItem{title: "Wallet Balance", desc: "Query the balance of active wallet", id: "account_bal"},
 		ListItem{title: "Send Transaction", desc: "Send a transaction", id: "send_tx"},
 		ListItem{title: "Query Balance", desc: "Query balance of an address", id: "query_bal"},
+		ListItem{title: "Go Back", desc: "Go back to wallet management", id: "back"},
 	}
 	return items
 }
