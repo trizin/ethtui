@@ -38,12 +38,12 @@ func (p Provider) SendSignedTransaction(signedhash string) (string, error) {
 	return tx.Hash().String(), nil
 }
 
-func (p Provider) GetBalance(address string, blockNumber int64) *big.Int {
+func (p Provider) GetBalance(address string, blockNumber uint64) *big.Int {
 	addr := common.HexToAddress(address)
 
 	var bigInt *big.Int
 	if blockNumber != 0 {
-		bigInt = big.NewInt(blockNumber)
+		bigInt = big.NewInt(int64(blockNumber))
 	}
 
 	bal, err := p.Client.BalanceAt(
