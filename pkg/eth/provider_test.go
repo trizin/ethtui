@@ -7,7 +7,7 @@ import (
 
 func TestProvider_GetBalance(t *testing.T) {
 
-	provider := GetProvider("https://cloudflare-eth.com")
+	provider := GetProvider("https://rpc.ankr.com/eth")
 	addr := "0x000000000000000000000000000000000000dEaD"
 
 	t.Run("Get balance at block", func(t *testing.T) {
