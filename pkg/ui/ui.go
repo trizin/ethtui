@@ -317,6 +317,7 @@ func getText(placeHolder string) textinput.Model {
 
 func GetUI() UI {
 	m := UI{title: "✨✨✨", list: list.NewModel(getMainItems(), list.NewDefaultDelegate(), 0, 0), input: getText(""), state: "main"}
+	m.list.Title = "✨✨✨"
 	return m
 }
 
