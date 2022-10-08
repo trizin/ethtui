@@ -63,3 +63,11 @@ func (p Provider) GetTransactionReceipt(hash string) (*types.Receipt, error) {
 	}
 	return receipt, nil
 }
+
+func (p Provider) GetTransactionInfo(hash string) (*types.Transaction, bool, error) {
+	tx, pending, err := p.Client.TransactionByHash(context.Background(), common.HexToHash(hash))
+	if err != nil {
+		return nil, false, err
+	}
+	return tx, pending, nil
+}
