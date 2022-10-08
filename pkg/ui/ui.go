@@ -256,6 +256,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		top, right, bottom, left := docStyle.GetMargin()
 		m.list.SetSize(msg.Width-left-right, msg.Height-top-bottom)
 		docStyle.Width(msg.Width)
+		m.input.Width = int(float64(msg.Width*5) / 6)
 	}
 
 	var cmd tea.Cmd
@@ -320,8 +321,6 @@ func getText(placeHolder string) textinput.Model {
 	ti := textinput.NewModel()
 	ti.Placeholder = placeHolder
 	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = 50
 	return ti
 }
 
