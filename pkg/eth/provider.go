@@ -55,3 +55,11 @@ func (p Provider) GetBalance(address string, blockNumber uint64) *big.Int {
 
 	return bal
 }
+
+func (p Provider) GetTransactionReceipt(hash string) (*types.Receipt, error) {
+	receipt, err := p.Client.TransactionReceipt(context.Background(), common.HexToHash(hash))
+	if err != nil {
+		return nil, err
+	}
+	return receipt, nil
+}
