@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -73,44 +72,25 @@ func (m UI) View() string {
 		switch m.state {
 
 		case "sign_transaction":
-			var b strings.Builder
-			for i := range m.multiInput {
-				b.WriteString(m.multiInput[i].View())
-				if i < len(m.multiInput)-1 {
-					b.WriteRune('\n')
-				}
-			}
-
-			button := &blurredButton
-			if m.focusIndex == len(m.multiInput) {
-				button = &focusedButton
-			}
-			fmt.Fprintf(&b, "\n\n%s\n\n", *button)
+			b := renderMultiInput(m)
 
 			return docStyle.Render(
 				fmt.Sprintf(
 					"%s\n\n%s\n%s",
-					"Sign Transaction",
-					b.String(),
+					titleStyle.Render("Sign Transaction"),
+					b,
 					blurredStyle.Render("Press c to cancel"),
 				))
 
 		case "keystore_access":
-			var b strings.Builder
-			for i := range m.multiInput {
-				b.WriteString(m.multiInput[i].View())
-				if i < len(m.multiInput)-1 {
-					b.WriteRune('\n')
-				}
-			}
-
-			button := &blurredButton
-			if m.focusIndex == len(m.multiInput) {
-				button = &focusedButton
-			}
-			fmt.Fprintf(&b, "\n\n%s\n\n", *button)
-
-			return b.String()
+			b := renderMultiInput(m)
+			return docStyle.Render(
+				fmt.Sprintf(
+					"%s\n\n%s\n%s",
+					titleStyle.Render("Access Keystore"),
+					b,
+					blurredStyle.Render("Press c to cancel"),
+				))
 
 		case "input":
 			return renderInput(m)

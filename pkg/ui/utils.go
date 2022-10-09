@@ -3,6 +3,7 @@ package ui
 import (
 	"eth-toolkit/pkg/eth"
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 )
@@ -46,4 +47,20 @@ func renderOutput(m UI) string {
 		docStyle.Render(m.output),
 		blurredStyle.Render("Press enter to continue"),
 	))
+}
+
+func renderMultiInput(m UI) string {
+	var b strings.Builder
+	for i := range m.multiInput {
+		b.WriteString(m.multiInput[i].View())
+		if i < len(m.multiInput)-1 {
+			b.WriteRune('\n')
+		}
+	}
+	button := &blurredButton
+	if m.focusIndex == len(m.multiInput) {
+		button = &focusedButton
+	}
+	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
+	return b.String()
 }
