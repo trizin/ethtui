@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"math"
 	"math/big"
 	"testing"
 )
@@ -173,6 +174,20 @@ func TestGetEstimatedGasUsage(t *testing.T) {
 	}
 }
 
+func TestGetGasPrice(t *testing.T) {
+	provider := GetProvider(rpcUrl)
+
+	gasPrice, err := provider.GetGasPrice()
+
+	if err != nil {
+		t.Errorf("Provider.GetGasPrice() error = %v", err)
+		return
+	}
+
+	if gasPrice.Cmp(big.NewInt(0)) != 1 {
+		t.Errorf("Provider.GetGasPrice() gas price = %v", gasPrice)
+	}
+}
 
 func TestGetGasTip(t *testing.T) {
 	provider := GetProvider(rpcUrl)
