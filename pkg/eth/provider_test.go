@@ -124,3 +124,46 @@ func TestGetNonce(t *testing.T) {
 		t.Errorf("Provider.GetNonce() = %v, want %v", got, expected)
 	}
 }
+
+func TestSignAndSendTransaction(t *testing.T) {
+	pk := "0x7477652b0d4f24e0b5cfdc60f49e4f58deb7c8781cdf92079b5cb17515615de7"
+	wallet := GetWalletFromPK(pk)
+	provider := GetProvider("http://localhost:8545")
+	addr := "0x000000000000000000000000000000000000dEaD"
+	sender := wallet.PublicKey
+
+	signedTx := wallet.SignTransaction(
+		int(provider.GetNonce(sender)),
+		addr,
+		1.0,
+		90000,
+		20.0,
+		"0x",
+		provider.GetChainId().Int64(),
+	)
+
+	balSender := provider.GetBalance(sender, 0)
+	if balSender.Cmp(big.NewInt(0)) != 1 {
+		t.Errorf("Provider.GetBalance() not enough balance")
+		return
+	}
+
+	beforebal := provider.GetBalance(addr, 0)
+	txHash, err := provider.SendSignedTransaction(signedTx)
+
+	if err != nil {
+		t.Errorf("Provider.SendTransaction() error = %v", err)
+		return
+	}
+
+	afterbal := provider.GetBalance(addr, 0)
+
+	if txHash == "" {
+		t.Errorf("Provider.SendTransaction() tx hash = %v", txHash)
+	}
+
+	if beforebal.Cmp(afterbal) != -1 {
+		t.Errorf("Provider.SendTransaction() balance = %v", afterbal)
+	}
+
+}
