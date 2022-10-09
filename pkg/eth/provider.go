@@ -89,3 +89,10 @@ func (p Provider) GetBlockInfo(blockNumber uint64) (*types.Block, error) {
 	return block, nil
 }
 
+func (p Provider) GetChainId() *big.Int {
+	chainId, err := p.Client.ChainID(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	return chainId
+}
