@@ -156,5 +156,20 @@ func TestSignAndSendTransaction(t *testing.T) {
 	if beforebal.Cmp(afterbal) != -1 {
 		t.Errorf("Provider.SendTransaction() balance = %v", afterbal)
 	}
+}
 
+func TestGetEstimatedGasUsage(t *testing.T) {
+	provider := GetProvider(rpcUrl)
+
+	gas, err := provider.GetEstimatedGasUsage([]byte("0x"))
+
+	if err != nil {
+		t.Errorf("Provider.GetEstimatedGasUsage() error = %v", err)
+		return
+	}
+
+	if math.Abs(float64(gas-21000)) > 1000 {
+		t.Errorf("Provider.GetEstimatedGasUsage() gas = %v", gas)
+	}
+}
 }
