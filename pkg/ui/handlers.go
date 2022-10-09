@@ -130,7 +130,6 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			case "provider_options":
 				m.loadListItems(getProviderItems(m), "Query Chain")
 			case "account_bal":
-				m.title = "Account Balance"
 				balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
 				eth_value := eth.GetEthValue(balance)
 				output := fmt.Sprintf("Balance is: %v", eth_value)
