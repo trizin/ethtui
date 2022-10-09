@@ -7,6 +7,17 @@ on:
     branches: [ "main" ]
 
 jobs:
+  
+  ganache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ganache
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install -g ganache-cli
+      - run: ganache-cli -p 8545 -k london --seed 12 > /dev/null &
 
   build:
     runs-on: ubuntu-latest
