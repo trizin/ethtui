@@ -56,7 +56,7 @@ func (m UI) getInState() string {
 }
 
 func (m *UI) setMultiInputView() {
-	m.multiInput = make([]textinput.Model, 6)
+	m.multiInput = make([]textinput.Model, 7)
 
 	var t textinput.Model
 	for i := range m.multiInput {
@@ -89,6 +89,9 @@ func (m *UI) setMultiInputView() {
 		case 5:
 			t.Prompt = "Data: "
 			t.Placeholder = "0x"
+		case 6:
+			t.Prompt = "Chain ID: "
+			t.Placeholder = "1"
 		}
 
 		m.multiInput[i] = t
