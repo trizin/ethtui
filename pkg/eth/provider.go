@@ -80,3 +80,12 @@ func (p Provider) GetNonce(address string) uint64 {
 	}
 	return nonce
 }
+
+func (p Provider) GetBlockInfo(blockNumber uint64) (*types.Block, error) {
+	block, err := p.Client.BlockByNumber(context.Background(), big.NewInt(int64(blockNumber)))
+	if err != nil {
+		return nil, err
+	}
+	return block, nil
+}
+
