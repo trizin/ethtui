@@ -172,4 +172,5 @@ func TestGetEstimatedGasUsage(t *testing.T) {
 		t.Errorf("Provider.GetEstimatedGasUsage() gas = %v", gas)
 	}
 }
+
 }
