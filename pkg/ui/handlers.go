@@ -8,8 +8,7 @@ import (
 )
 
 func requestProvider(m *UI) {
-	setInputState(m, "Set Provider", "Enter provider URL")
-	m.setInState("update_provider")
+	setInputState(m, "Set Provider", "Enter provider URL", "update_provider")
 }
 
 func moveIndex(m UI, s string) (UI, []tea.Cmd) {
@@ -62,8 +61,9 @@ func setOutputState(m *UI, title string, output string) {
 	m.output = output
 }
 
-func setInputState(m *UI, title string, placeholder string) {
+func setInputState(m *UI, title string, placeholder string, instate string) {
 	m.setState("input")
+	m.setInState(instate)
 	m.title = title
 	m.input = getText(placeholder)
 }

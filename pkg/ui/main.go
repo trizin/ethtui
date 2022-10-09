@@ -25,6 +25,13 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
+
+		case "c":
+			if m.state == "input" || m.state == "sign_transaction" || m.state == "keystore_access" {
+				m.setInState("")
+				m.setState("main")
+			}
+
 		case "ctrl+c":
 			return m, tea.Quit
 
@@ -34,7 +41,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "tab", "shift+tab", "up", "down":
-			if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "mnemonic" {
+			if m.state == "sign_transaction" || m.state == "keystore_access" {
 				s := msg.String()
 				m, cmds := moveIndex(m, s)
 				return m, tea.Batch(cmds...)
@@ -131,8 +138,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					case "keystore_access":
 						m.setMultiInputViewKeystoreFile()
 					case "mnemonic":
-						m.title = "Mnemonic Words (seperated by space)"
-						setInputState(&m, "Mnemonic Words (seperated by space)", "airport loud mixture")
+						setInputState(&m, "Mnemonic Words (seperated by space)", "airport loud mixture", "mnemonic")
 					case "access_wallet":
 						m.loadListItems(getAccessWalletItems(), "Access Wallet")
 					case "new_wallet":
@@ -149,11 +155,15 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						setOutputState(&m, "Mnemonic Words (seperated by space), SAVE IT somewhere safe", output)
 						m.setInState("new_hd_wallet_output")
 					case "pk":
-						setInputState(&m, "Private Key", "Private key")
+						setInputState(&m, "Private Key", "Private key", item.id)
 					case "sign_message":
-						setInputState(&m, "Sign Message", "Message to sign")
+						setInputState(&m, "Sign Message", "Message to sign", item.id)
 					case "save_keystore":
-						setInputState(&m, "Save Keystore", "Password")
+						setInputState(&m, "Save Keystore", "Password", item.id)
+					case "query_bal":
+						setInputState(&m, "Query Balance", "Address", item.id)
+					case "send_tx":
+						setInputState(&m, "Send Transaction", "Signed Transaction Hash", item.id)
 					case "provider_options":
 						m.loadListItems(getProviderItems(m), "Query Chain")
 					case "account_bal":
@@ -162,14 +172,9 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						eth_value := eth.GetEthValue(balance)
 						output := fmt.Sprintf("Balance is: %v", eth_value)
 						setOutputState(&m, "Account Balance", output)
-					case "query_bal":
-						setInputState(&m, "Query Balance", "Address")
-					case "send_tx":
-						setInputState(&m, "Send Transaction", "Signed Transaction Hash")
 					case "back":
 						loadWalletState(&m, m.walletData)
 					}
-					m.setInState(item.id)
 					m.choice = item
 				}
 			}
@@ -192,7 +197,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.input, cmd = m.input.Update(msg)
 	}
 
-	if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "mnemonic" {
+	if m.state == "sign_transaction" || m.state == "keystore_access" {
 		cmd = m.updateInputs(msg)
 	}
 
@@ -248,7 +253,7 @@ func (m UI) View() string {
 				"%s\n%s\n%s",
 				titleStyle.Render(m.title),
 				m.input.View(),
-				blurredStyle.Render("Press ctrl+c to quit"),
+				blurredStyle.Render("Press c to cancel"),
 			))
 
 		case "output":
