@@ -19,7 +19,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
 
-		case "c":
+		case "alt+c":
 			if m.state == "input" || m.state == "sign_transaction" || m.state == "keystore_access" {
 				m.setInState("")
 				m.setState("main")
