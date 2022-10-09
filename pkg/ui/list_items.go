@@ -22,6 +22,8 @@ func getProviderItems(m UI) []list.Item {
 		ListItem{title: "Wallet Balance", desc: "Query the balance of active wallet", id: "account_bal"},
 		ListItem{title: "Send Transaction", desc: "Send a transaction", id: "send_tx"},
 		ListItem{title: "Query Balance", desc: "Query balance of an address", id: "query_bal"},
+		ListItem{title: "Query Transaction", desc: "Get transaction details", id: "query_tx"},
+		ListItem{title: "Query Block", desc: "Get block details", id: "query_block"},
 		ListItem{title: "Go Back", desc: "Go back to wallet management", id: "back"},
 	}
 	return items

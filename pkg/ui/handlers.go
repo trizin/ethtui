@@ -54,6 +54,27 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			eth_value := eth.GetEthValue(balance)
 			output := fmt.Sprintf("Balance is: %v", eth_value)
 			setOutputState(&m, "Account Balance", output)
+		case "query_tx":
+			txHash := m.getInputValue()
+			output, err := eth.GetTransactionInfoString(m.provider, txHash)
+			if err != nil {
+				output = fmt.Sprintf("Error: %s", err)
+			}
+			setOutputState(&m, "Transaction Info", output)
+
+		case "query_block":
+			blockNumber, err := strconv.ParseInt(m.getInputValue(), 10, 64)
+			if err != nil {
+				setOutputState(&m, "Block Info (error)", err.Error())
+				return m, nil
+			}
+			output, err := eth.GetBlockInfoString(m.provider, uint64(blockNumber))
+			if err != nil {
+				output = fmt.Sprintf("Error: %s", err)
+			}
+
+			setOutputState(&m, "Block Info", output)
+
 		case "save_keystore":
 			password := m.getInputValue()
 			keystoreFile := m.walletData.CreateKeystore(password)
@@ -125,6 +146,10 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 				setInputState(&m, "Save Keystore", "Password", item.id)
 			case "query_bal":
 				setInputState(&m, "Query Balance", "Address", item.id)
+			case "query_tx":
+				setInputState(&m, "Query Transaction", "Transaction Hash", item.id)
+			case "query_block":
+				setInputState(&m, "Query Block", "Block Number", item.id)
 			case "send_tx":
 				setInputState(&m, "Send Transaction", "Signed Transaction Hash", item.id)
 			case "provider_options":
