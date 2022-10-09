@@ -22,7 +22,7 @@ $ go build .
 - Load an existing wallet from a private key/keystore file.
 - Create & manage HD wallets.
 - Sign messages.
-- Sign and send signed transactions.
+- Sign and send transactions.
 - Query chain data.
   - Get account balance.
   - Get tx info by hash.
