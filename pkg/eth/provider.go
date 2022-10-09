@@ -100,3 +100,12 @@ func (p Provider) GetChainId() *big.Int {
 	}
 	return chainId
 }
+
+func (p Provider) GetGasPrice() (*big.Int, error) {
+	gasPrice, err := p.Client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return gasPrice, nil
+}
+
