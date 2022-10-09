@@ -109,3 +109,10 @@ func (p Provider) GetGasPrice() (*big.Int, error) {
 	return gasPrice, nil
 }
 
+func (p Provider) GetGasTipCap() (*big.Int, error) {
+	gasLimit, err := p.Client.SuggestGasTipCap(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return gasLimit, nil
+}
