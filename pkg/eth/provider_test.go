@@ -27,15 +27,6 @@ func TestProvider_GetBalance(t *testing.T) {
 	})
 }
 
-func TestGetEthValue(t *testing.T) {
-	wei := big.NewInt(1100000000000000000)
-	expected := 1.1
-	got := GetEthValue(wei)
-	if got != expected {
-		t.Errorf("GetEthValue() = %v, want %v", got, expected)
-	}
-}
-
 func TestGetTransactionReceipt(t *testing.T) {
 	provider := GetProvider(rpcUrl)
 	txHash := "0x82237a9d319cbb9a46d1bbbdbac870918e70ae9f0350db24dc578c1a5cf4d859"
