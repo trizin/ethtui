@@ -113,3 +113,14 @@ func TestGetTransactionInfo(t *testing.T) {
 		t.Errorf("Provider.GetTransactionInfo() data = %v", tx.Data())
 	}
 }
+
+func TestGetNonce(t *testing.T) {
+	provider := GetProvider(rpcUrl)
+	addr := "0x000000000000000000000000000000000000dEaD"
+
+	expected := uint64(0)
+	got := provider.GetNonce(addr)
+	if got != expected {
+		t.Errorf("Provider.GetNonce() = %v, want %v", got, expected)
+	}
+}
