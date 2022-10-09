@@ -16,19 +16,19 @@ jobs:
       with:
         node-version: '14'
 
+    - name: Install Ganache
+      run: npm install -g ganache
+
+    - name: Run Ganache
+      run: ganache -p 8545 -k london --seed 12 &
+
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.18
 
-    - name: Install Ganache
-      run: npm install -g ganache-cli
-
     - name: Build
       run: go build -v ./...
-
-    - name: Run Ganache
-      run: ganache-cli -p 8545 -k london --seed 12 &
 
     - name: Test
       run: go test -v ./...
