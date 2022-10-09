@@ -138,3 +138,16 @@ func (m *UI) getInputValue() string {
 	m.input.SetValue("")
 	return s
 }
+
+func (m *UI) loadListItems(items []list.Item, title string) {
+	m.list.SetItems(items)
+	m.resetListCursor()
+	m.setListTitle(title)
+	m.title = title
+	m.setState("main")
+}
+
+func (m *UI) loadHDWallet() {
+	m.loadListItems(getHdWalletItems(m.hdWallet), "HD Wallet Addresses")
+	m.setState("hdwallet")
+}

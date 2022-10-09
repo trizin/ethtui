@@ -8,9 +8,8 @@ import (
 )
 
 func requestProvider(m *UI) {
-	m.setState("update_provider")
-	m.input = getText("Enter provider URL")
-	m.title = "Set Provider"
+	setInputState(m, "Set Provider", "Enter provider URL")
+	m.setInState("update_provider")
 }
 
 func moveIndex(m UI, s string) (UI, []tea.Cmd) {
@@ -71,10 +70,10 @@ func setInputState(m *UI, title string, placeholder string) {
 
 func loadWalletState(m *UI, walletData eth.WalletData) {
 	m.walletData = walletData
-	m.setState("main")
-	m.list.SetItems(getControlWalletItems(*m))
-	m.resetListCursor()
-	m.setListTitle(m.walletData.PublicKey)
+	m.loadListItems(
+		getControlWalletItems(*m),
+		m.walletData.PublicKey,
+	)
 }
 
 func quitToMainMenu(m *UI) {

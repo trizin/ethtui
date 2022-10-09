@@ -44,12 +44,8 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state == "new_wallet" || m.state == "get_info_wallet" || m.state == "output" {
 				if m.getInState() == "new_hd_wallet_output" {
 					mnm := m.output
-					m.output = ""
 					m.hdWallet = hd.NewHDWallet(mnm)
-					m.setState("hdwallet")
-					m.setListTitle("HD Wallet Addresses")
-					m.list.SetItems(getHdWalletItems(m.hdWallet))
-					m.resetListCursor()
+					m.loadHDWallet()
 					m.setInState("")
 					return m, nil
 				}
@@ -57,24 +53,25 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if m.state == "input" {
 				instate := m.getInState()
 				m.setInState("")
-				if instate == "pk" {
+				switch instate {
+				case "pk":
 					privateKey := m.getInputValue()
 					walletData := eth.GetWalletFromPK(privateKey)
 					loadWalletState(&m, walletData)
-				} else if instate == "mnemonic" {
+				case "mnemonic":
 					mnm := m.getInputValue()
 					m.hdWallet = hd.NewHDWallet(mnm)
 					m.setState("hdwallet")
 					m.setListTitle("HD Wallet Addresses")
 					m.list.SetItems(getHdWalletItems(m.hdWallet))
 					m.resetListCursor()
-				} else if instate == "sign_message" {
+				case "sign_message":
 					message := m.getInputValue()
 					signedMessage := m.walletData.SignMessage(message)
 					setOutputState(
 						&m, "Signed Message", signedMessage,
 					)
-				} else if instate == "send_tx" {
+				case "send_tx":
 					signedTx := m.getInputValue()
 					txHash, err := m.provider.SendSignedTransaction(signedTx)
 					var output string
@@ -84,17 +81,21 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						output = fmt.Sprintf("Transaction hash: %s", txHash)
 					}
 					setOutputState(&m, "Send Transaction", output)
-				} else if instate == "query_bal" {
+				case "query_bal":
 					addr := m.getInputValue()
 					balance := m.provider.GetBalance(addr, 0)
 					eth_value := eth.GetEthValue(balance)
 					output := fmt.Sprintf("Balance is: %v", eth_value)
 					setOutputState(&m, "Account Balance", output)
-				} else if instate == "save_keystore" {
+				case "save_keystore":
 					password := m.getInputValue()
 					keystoreFile := m.walletData.CreateKeystore(password)
 					setOutputState(&m, "Keystore file saved", "Path: "+keystoreFile)
+				case "update_provider":
+					m.provider = eth.GetProvider(m.getInputValue())
+					loadWalletState(&m, m.walletData)
 				}
+
 			} else if m.state == "sign_transaction" {
 				if m.focusIndex == len(m.multiInput) {
 					signedTransaction := signTransaction(m)
@@ -127,6 +128,8 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				item, ok := m.list.SelectedItem().(ListItem)
 
 				m.setState(item.id)
+				m.setInState(item.id)
+
 				switch item.id {
 				case "sign_transaction":
 					m.setMultiInputView()
@@ -141,12 +144,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setListTitle("Access Wallet")
 				case "new_wallet":
 					walletData := eth.GenerateWallet()
-					m.walletData = walletData
-					m.setState("main")
-					m.list.SetItems(getControlWalletItems(m))
-					m.resetListCursor()
-					m.input = getText("")
-					m.setListTitle(m.walletData.PublicKey)
+					loadWalletState(&m, walletData)
 				case "public_key":
 					output := displayWalletPublicKey(m.walletData)
 					setOutputState(&m, "Public Key", output)
@@ -159,18 +157,12 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setInState("new_hd_wallet_output")
 				case "pk":
 					setInputState(&m, "Private Key", "Private key")
-					m.setInState(item.id)
 				case "sign_message":
 					setInputState(&m, "Sign Message", "Message to sign")
-					m.setInState(item.id)
 				case "save_keystore":
 					setInputState(&m, "Save Keystore", "Password")
-					m.setInState(item.id)
 				case "provider_options":
-					m.title = "Query Chain"
-					m.list.SetItems(getProviderItems(m))
-					m.resetListCursor()
-					m.setState("main")
+					m.loadListItems(getProviderItems(m), "Query Chain")
 				case "account_bal":
 					m.title = "Account Balance"
 					balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
@@ -179,14 +171,10 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					setOutputState(&m, "Account Balance", output)
 				case "query_bal":
 					setInputState(&m, "Query Balance", "Address")
-					m.setInState(item.id)
 				case "send_tx":
 					setInputState(&m, "Send Transaction", "Signed Transaction Hash")
-					m.setInState(item.id)
 				case "back":
-					m.setState("main")
-					m.list.SetItems(getControlWalletItems(m))
-					m.resetListCursor()
+					loadWalletState(&m, m.walletData)
 				}
 
 				if m.state == "quit" {
@@ -196,11 +184,6 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if ok {
 					m.choice = item
 				}
-			} else if m.state == "update_provider" {
-				m.provider = eth.GetProvider(m.getInputValue())
-				m.setState("main")
-				m.list.SetItems(getControlWalletItems(m))
-				m.resetListCursor()
 			}
 		}
 
