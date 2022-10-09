@@ -28,7 +28,7 @@ jobs:
       run: go build -v ./...
 
     - name: Run Ganache
-      run: ganache-cli -p 8545 -k london --seed 12 > /dev/null &
+      run: ganache-cli -p 8545 -k london --seed 12 &
 
     - name: Test
       run: go test -v ./...
