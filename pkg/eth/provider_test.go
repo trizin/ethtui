@@ -173,4 +173,18 @@ func TestGetEstimatedGasUsage(t *testing.T) {
 	}
 }
 
+
+func TestGetGasTip(t *testing.T) {
+	provider := GetProvider(rpcUrl)
+
+	gasTip, err := provider.GetGasTipCap()
+
+	if err != nil {
+		t.Errorf("Provider.GetGasTip() error = %v", err)
+		return
+	}
+
+	if gasTip.Cmp(big.NewInt(0)) != 1 {
+		t.Errorf("Provider.GetGasTip() gas tip = %v", gasTip)
+	}
 }
