@@ -116,19 +116,17 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					} else {
 						index, _ := strconv.Atoi(item.id)
 						privateKey := m.hdWallet.GetAccount(index).PrivateKey
-						m.walletData = eth.GetWalletFromPK(privateKey)
-						m.setState("main")
-						m.list.SetItems(getControlWalletItems(m))
-						m.resetListCursor()
-						m.setListTitle(m.walletData.PublicKey)
+						loadWalletState(&m, eth.GetWalletFromPK(privateKey))
 					}
 				}
 
-			} else if m.state == "main" || m.state == "access_wallet" {
+			} else if m.state == "main" {
 				item, ok := m.list.SelectedItem().(ListItem)
 
 				m.setState(item.id)
-				m.setInState(item.id)
+				if m.state == "quit" {
+					quitToMainMenu(&m)
+				}
 
 				switch item.id {
 				case "sign_transaction":
@@ -139,9 +137,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.title = "Mnemonic Words (seperated by space)"
 					setInputState(&m, "Mnemonic Words (seperated by space)", "airport loud mixture")
 				case "access_wallet":
-					m.list.SetItems(getAccessWalletItems())
-					m.resetListCursor()
-					m.setListTitle("Access Wallet")
+					m.loadListItems(getAccessWalletItems(), "Access Wallet")
 				case "new_wallet":
 					walletData := eth.GenerateWallet()
 					loadWalletState(&m, walletData)
@@ -177,13 +173,10 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					loadWalletState(&m, m.walletData)
 				}
 
-				if m.state == "quit" {
-					quitToMainMenu(&m)
-				}
-
 				if ok {
 					m.choice = item
 				}
+				m.setInState(item.id)
 			}
 		}
 
@@ -196,7 +189,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 
-	if m.state == "main" || m.state == "access_wallet" || m.state == "hdwallet" {
+	if m.state == "main" || m.state == "hdwallet" {
 		m.list, cmd = m.list.Update(msg)
 	}
 
