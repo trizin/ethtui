@@ -4,6 +4,7 @@ import (
 	"eth-toolkit/pkg/eth"
 	"fmt"
 
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -24,6 +25,13 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.state == "input" || m.state == "sign_transaction" || m.state == "keystore_access" {
 				m.setInState("")
 				m.setState("main")
+			}
+
+		case "c":
+			if m.state == "output" {
+				msg := m.output
+				// copy to clipboard
+				clipboard.WriteAll(msg)
 			}
 
 		case "alt+e":

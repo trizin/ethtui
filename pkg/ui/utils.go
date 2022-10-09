@@ -42,10 +42,11 @@ func renderInput(m UI) string {
 
 func renderOutput(m UI) string {
 	return docStyle.Render(fmt.Sprintf(
-		"%s\n%s\n%s",
+		"%s\n%s\n%s\n%s",
 		titleStyle.Render(m.title),
 		docStyle.Render(m.output),
 		blurredStyle.Render("Press enter to continue"),
+		blurredStyle.Render("Press c to copy to clipboard"),
 	))
 }
 
