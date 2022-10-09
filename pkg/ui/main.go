@@ -89,9 +89,10 @@ func (m UI) View() string {
 
 			return docStyle.Render(
 				fmt.Sprintf(
-					"%s\n\n%s",
+					"%s\n\n%s\n%s",
 					"Sign Transaction",
 					b.String(),
+					blurredStyle.Render("Press c to cancel"),
 				))
 
 		case "keystore_access":
