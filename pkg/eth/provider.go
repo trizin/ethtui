@@ -71,3 +71,12 @@ func (p Provider) GetTransactionInfo(hash string) (*types.Transaction, bool, err
 	}
 	return tx, pending, nil
 }
+
+func (p Provider) GetNonce(address string) uint64 {
+	addr := common.HexToAddress(address)
+	nonce, err := p.Client.PendingNonceAt(context.Background(), addr)
+	if err != nil {
+		panic(err)
+	}
+	return nonce
+}
