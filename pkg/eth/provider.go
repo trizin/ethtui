@@ -24,6 +24,10 @@ func GetProvider(url string) *Provider {
 }
 
 func (p Provider) SendSignedTransaction(signedhash string) (string, error) {
+	// replace 0x with "" if exists
+	if signedhash[:2] == "0x" {
+		signedhash = signedhash[2:]
+	}
 	rawTx, err := hex.DecodeString(signedhash)
 	if err != nil {
 		return "", err
