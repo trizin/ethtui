@@ -51,10 +51,8 @@ func (m *UI) setInState(state string) {
 	m.instate = state
 }
 
-func (m *UI) getInState() string {
-	s := m.instate
-	m.instate = ""
-	return s
+func (m UI) getInState() string {
+	return m.instate
 }
 
 func (m *UI) setMultiInputView() {
@@ -133,4 +131,10 @@ func (m *UI) updateInputs(msg tea.Msg) tea.Cmd {
 	}
 
 	return tea.Batch(cmds...)
+}
+
+func (m *UI) getInputValue() string {
+	s := m.input.Value()
+	m.input.SetValue("")
+	return s
 }

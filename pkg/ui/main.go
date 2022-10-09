@@ -50,8 +50,50 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setListTitle("HD Wallet Addresses")
 					m.list.SetItems(getHdWalletItems(m.hdWallet))
 					m.resetListCursor()
-				} else {
-					m.setState("main")
+					m.setInState("")
+					return m, nil
+				}
+				m.setState("main")
+			} else if m.state == "input" {
+				instate := m.getInState()
+				m.setInState("")
+				if instate == "pk" {
+					privateKey := m.getInputValue()
+					walletData := eth.GetWalletFromPK(privateKey)
+					loadWalletState(&m, walletData)
+				} else if instate == "mnemonic" {
+					mnm := m.getInputValue()
+					m.hdWallet = hd.NewHDWallet(mnm)
+					m.setState("hdwallet")
+					m.setListTitle("HD Wallet Addresses")
+					m.list.SetItems(getHdWalletItems(m.hdWallet))
+					m.resetListCursor()
+				} else if instate == "sign_message" {
+					message := m.getInputValue()
+					signedMessage := m.walletData.SignMessage(message)
+					setOutputState(
+						&m, "Signed Message", signedMessage,
+					)
+				} else if instate == "send_tx" {
+					signedTx := m.getInputValue()
+					txHash, err := m.provider.SendSignedTransaction(signedTx)
+					var output string
+					if err != nil {
+						output = fmt.Sprintf("Error: %s", err)
+					} else {
+						output = fmt.Sprintf("Transaction hash: %s", txHash)
+					}
+					setOutputState(&m, "Send Transaction", output)
+				} else if instate == "query_bal" {
+					addr := m.getInputValue()
+					balance := m.provider.GetBalance(addr, 0)
+					eth_value := eth.GetEthValue(balance)
+					output := fmt.Sprintf("Balance is: %v", eth_value)
+					setOutputState(&m, "Account Balance", output)
+				} else if instate == "save_keystore" {
+					password := m.getInputValue()
+					keystoreFile := m.walletData.CreateKeystore(password)
+					setOutputState(&m, "Keystore file saved", "Path: "+keystoreFile)
 				}
 			} else if m.state == "sign_transaction" {
 				if m.focusIndex == len(m.multiInput) {
@@ -64,55 +106,11 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				password := m.multiInput[1].Value()
 				walletData := eth.LoadKeystore(path, password)
 				loadWalletState(&m, walletData)
-
-			} else if m.state == "pk" {
-				privateKey := m.input.Value()
-				m.input.SetValue("")
-				walletData := eth.GetWalletFromPK(privateKey)
-				loadWalletState(&m, walletData)
-			} else if m.state == "mnemonic" {
-				mnm := m.input.Value()
-				m.input.SetValue("")
-				m.hdWallet = hd.NewHDWallet(mnm)
-				m.setState("hdwallet")
-				m.setListTitle("HD Wallet Addresses")
-				m.list.SetItems(getHdWalletItems(m.hdWallet))
-				m.resetListCursor()
-			} else if m.state == "sign_message" {
-				message := m.input.Value()
-				signedMessage := m.walletData.SignMessage(message)
-				setOutputState(
-					&m, "Signed Message", signedMessage,
-				)
-			} else if m.state == "send_tx" {
-				signedTx := m.input.Value()
-				txHash, err := m.provider.SendSignedTransaction(signedTx)
-				var output string
-				if err != nil {
-					output = fmt.Sprintf("Error: %s", err)
-				} else {
-					output = fmt.Sprintf("Transaction hash: %s", txHash)
-				}
-				setOutputState(&m, "Send Transaction", output)
-			} else if m.state == "query_bal" {
-				addr := m.input.Value()
-				balance := m.provider.GetBalance(addr, 0)
-				eth_value := eth.GetEthValue(balance)
-				output := fmt.Sprintf("Balance is: %v", eth_value)
-				setOutputState(&m, "Account Balance", output)
-
-			} else if m.state == "save_keystore" {
-				password := m.input.Value()
-				keystoreFile := m.walletData.CreateKeystore(password)
-				setOutputState(&m, "Keystore file saved", "Path: "+keystoreFile)
 			} else if m.state == "hdwallet" {
 				item, ok := m.list.SelectedItem().(ListItem)
 				if ok {
 					if item.id == "quit" {
-						m.list.SetItems(getMainItems())
-						m.resetListCursor()
-						m.setState("main")
-						m.setListTitle("✨✨✨")
+						quitToMainMenu(&m)
 						m.hdWallet = nil
 					} else {
 						index, _ := strconv.Atoi(item.id)
@@ -136,6 +134,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setMultiInputViewKeystoreFile()
 				case "mnemonic":
 					m.title = "Mnemonic Words (seperated by space)"
+					setInputState(&m, "Mnemonic Words (seperated by space)", "airport loud mixture")
 				case "access_wallet":
 					m.list.SetItems(getAccessWalletItems())
 					m.resetListCursor()
@@ -191,19 +190,15 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 				if m.state == "quit" {
-					m.list.SetItems(getMainItems())
-					m.resetListCursor()
-					m.setState("main")
-					m.setListTitle("✨✨✨")
+					quitToMainMenu(&m)
 				}
 
 				if ok {
 					m.choice = item
 				}
 			} else if m.state == "update_provider" {
-				m.provider = eth.GetProvider(m.input.Value())
+				m.provider = eth.GetProvider(m.getInputValue())
 				m.setState("main")
-				m.input.SetValue("")
 				m.list.SetItems(getControlWalletItems(m))
 				m.resetListCursor()
 			}
@@ -222,7 +217,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list, cmd = m.list.Update(msg)
 	}
 
-	if m.state == "pk" || m.state == "sign_message" || m.state == "save_keystore" || m.state == "keystore_access" || m.state == "mnemonic" || m.state == "update_provider" || m.state == "send_tx" || m.state == "query_bal" {
+	if m.state == "input" {
 		m.input, cmd = m.input.Update(msg)
 	}
 
@@ -277,7 +272,7 @@ func (m UI) View() string {
 
 			return b.String()
 
-		case "save_keystore", "pk", "sign_message", "mnemonic", "update_provider", "send_tx", "query_bal":
+		case "input":
 			return docStyle.Render(fmt.Sprintf(
 				"%s\n%s\n%s",
 				titleStyle.Render(m.title),

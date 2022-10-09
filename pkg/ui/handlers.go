@@ -76,3 +76,10 @@ func loadWalletState(m *UI, walletData eth.WalletData) {
 	m.resetListCursor()
 	m.setListTitle(m.walletData.PublicKey)
 }
+
+func quitToMainMenu(m *UI) {
+	m.list.SetItems(getMainItems())
+	m.resetListCursor()
+	m.setState("main")
+	m.setListTitle("✨✨✨")
+}
