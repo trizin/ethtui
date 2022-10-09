@@ -12,3 +12,11 @@ func GetEthValue(wei *big.Int) float64 {
 	val, _ := ethValue.Float64()
 	return val
 }
+
+func GetGweiValue(wei *big.Int) float64 {
+	fbalance := new(big.Float)
+	fbalance.SetString(wei.String())
+	ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(9)))
+	val, _ := ethValue.Float64()
+	return val
+}

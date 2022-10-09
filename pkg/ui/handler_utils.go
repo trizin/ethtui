@@ -51,8 +51,9 @@ func signTransaction(m UI) string {
 	gasPrice, _ := strconv.ParseFloat(m.multiInput[4].Value(), 64)
 	data := m.multiInput[5].Value()
 	chainId, _ := strconv.Atoi(m.multiInput[6].Value())
+	gasTipCap, _ := strconv.ParseFloat(m.multiInput[7].Value(), 64)
 
-	signedTransaction := m.walletData.SignTransaction(nonce, toAddress, value, gasLimit, gasPrice, data, int64(chainId))
+	signedTransaction := m.walletData.SignTransaction(uint64(nonce), toAddress, value, gasLimit, gasPrice, data, int64(chainId), gasTipCap)
 	return signedTransaction
 }
 

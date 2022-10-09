@@ -77,13 +77,13 @@ func (p Provider) GetTransactionInfo(hash string) (*types.Transaction, bool, err
 	return tx, pending, nil
 }
 
-func (p Provider) GetNonce(address string) uint64 {
+func (p Provider) GetNonce(address string) (uint64, error) {
 	addr := common.HexToAddress(address)
 	nonce, err := p.Client.PendingNonceAt(context.Background(), addr)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
-	return nonce
+	return nonce, nil
 }
 
 func (p Provider) GetBlockInfo(blockNumber uint64) (*types.Block, error) {
@@ -94,12 +94,12 @@ func (p Provider) GetBlockInfo(blockNumber uint64) (*types.Block, error) {
 	return block, nil
 }
 
-func (p Provider) GetChainId() *big.Int {
+func (p Provider) GetChainId() (*big.Int, error) {
 	chainId, err := p.Client.ChainID(context.Background())
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return chainId
+	return chainId, nil
 }
 
 func (p Provider) GetGasPrice() (*big.Int, error) {

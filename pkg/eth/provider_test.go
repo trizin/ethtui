@@ -111,7 +111,11 @@ func TestGetNonce(t *testing.T) {
 	addr := "0x000000000000000000000000000000000000dEaD"
 
 	expected := uint64(0)
-	got := provider.GetNonce(addr)
+	got, err := provider.GetNonce(addr)
+	if err != nil {
+		t.Errorf("Provider.GetNonce() error = %v", err)
+		return
+	}
 	if got != expected {
 		t.Errorf("Provider.GetNonce() = %v, want %v", got, expected)
 	}
@@ -123,15 +127,25 @@ func TestSignAndSendTransaction(t *testing.T) {
 	provider := GetProvider("http://localhost:8545")
 	addr := "0x000000000000000000000000000000000000dEaD"
 	sender := wallet.PublicKey
-
+	chainId, err := provider.GetChainId()
+	if err != nil {
+		t.Errorf("Provider.GetChainId() error = %v", err)
+		return
+	}
+	nonce, err := provider.GetNonce(sender)
+	if err != nil {
+		t.Errorf("Provider.GetNonce() error = %v", err)
+		return
+	}
 	signedTx := wallet.SignTransaction(
-		int(provider.GetNonce(sender)),
+		nonce,
 		addr,
 		1.0,
 		90000,
 		20.0,
 		"0x",
-		provider.GetChainId().Int64(),
+		chainId.Int64(),
+		2,
 	)
 
 	balSender := provider.GetBalance(sender, 0)

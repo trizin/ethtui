@@ -36,7 +36,7 @@ func renderInput(m UI) string {
 		"%s\n%s\n%s",
 		titleStyle.Render(m.title),
 		m.input.View(),
-		blurredStyle.Render("Press c to cancel"),
+		blurredStyle.Render("Press alt+c to cancel"),
 	))
 }
 

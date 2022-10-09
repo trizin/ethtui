@@ -56,7 +56,7 @@ func (m UI) getInState() string {
 }
 
 func (m *UI) setMultiInputView() {
-	m.multiInput = make([]textinput.Model, 7)
+	m.multiInput = make([]textinput.Model, 8)
 
 	var t textinput.Model
 	for i := range m.multiInput {
@@ -75,7 +75,7 @@ func (m *UI) setMultiInputView() {
 			t.CharLimit = 42
 			t.Prompt = "To Address: "
 		case 2:
-			t.Prompt = "Value in ETH: "
+			t.Prompt = "Value (ETH): "
 			t.Placeholder = "0.01"
 			t.CharLimit = 20
 		case 3:
@@ -83,7 +83,7 @@ func (m *UI) setMultiInputView() {
 			t.Placeholder = "70000"
 			t.CharLimit = 20
 		case 4:
-			t.Prompt = "Gas Price in GWEI: "
+			t.Prompt = "Gas Price (GWEI): "
 			t.Placeholder = "120"
 			t.CharLimit = 20
 		case 5:
@@ -91,6 +91,9 @@ func (m *UI) setMultiInputView() {
 			t.Placeholder = "0x"
 		case 6:
 			t.Prompt = "Chain ID: "
+			t.Placeholder = "1"
+		case 7:
+			t.Prompt = "Priority fee (GWEI): "
 			t.Placeholder = "1"
 		}
 

@@ -14,6 +14,7 @@ func TestWalletData_SignTransaction(t *testing.T) {
 		100,
 		"0x",
 		1,
+		2,
 	)
 
 	if signed == "" {

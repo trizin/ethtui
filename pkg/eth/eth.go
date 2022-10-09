@@ -87,13 +87,14 @@ func LoadKeystore(path string, password string) WalletData {
 }
 
 func (w WalletData) SignTransaction(
-	nonce int,
+	nonce uint64,
 	toAddress string,
 	value float64,
 	gasLimit int,
 	gasPrice float64,
 	data string,
 	chainId int64,
+	gasTipCap float64,
 ) string {
 	addr := common.HexToAddress(toAddress)
 	tx := types.NewTx(
@@ -103,7 +104,7 @@ func (w WalletData) SignTransaction(
 			To:        &addr,
 			Value:     big.NewInt(int64(value * 1e18)),
 			GasFeeCap: big.NewInt(int64(gasPrice * 1e9)),
-			GasTipCap: big.NewInt(2000000000),
+			GasTipCap: big.NewInt(int64(gasTipCap * 1e9)),
 			Gas:       uint64(gasLimit),
 			Data:      []byte(data),
 		},
