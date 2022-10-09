@@ -116,3 +116,22 @@ func (p Provider) GetGasTipCap() (*big.Int, error) {
 	}
 	return gasLimit, nil
 }
+
+func (p Provider) GetEstimatedGasUsage(
+	data []byte,
+) (uint64, error) {
+	a := common.Address{}
+	msg := ethereum.CallMsg{
+		From: common.Address{},
+		To:   &a,
+		Data: data,
+	}
+
+	gasLimit, err := p.Client.EstimateGas(context.Background(), msg)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return gasLimit, nil
+}
