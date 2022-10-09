@@ -61,10 +61,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				case "mnemonic":
 					mnm := m.getInputValue()
 					m.hdWallet = hd.NewHDWallet(mnm)
-					m.setState("hdwallet")
-					m.setListTitle("HD Wallet Addresses")
-					m.list.SetItems(getHdWalletItems(m.hdWallet))
-					m.resetListCursor()
+					m.loadHDWallet()
 				case "sign_message":
 					message := m.getInputValue()
 					signedMessage := m.walletData.SignMessage(message)
@@ -122,61 +119,59 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			} else if m.state == "main" {
 				item, ok := m.list.SelectedItem().(ListItem)
-
-				m.setState(item.id)
-				if m.state == "quit" {
-					quitToMainMenu(&m)
-				}
-
-				switch item.id {
-				case "sign_transaction":
-					m.setMultiInputView()
-				case "keystore_access":
-					m.setMultiInputViewKeystoreFile()
-				case "mnemonic":
-					m.title = "Mnemonic Words (seperated by space)"
-					setInputState(&m, "Mnemonic Words (seperated by space)", "airport loud mixture")
-				case "access_wallet":
-					m.loadListItems(getAccessWalletItems(), "Access Wallet")
-				case "new_wallet":
-					walletData := eth.GenerateWallet()
-					loadWalletState(&m, walletData)
-				case "public_key":
-					output := displayWalletPublicKey(m.walletData)
-					setOutputState(&m, "Public Key", output)
-				case "private_key":
-					output := displayWalletPrivateKey(m.walletData)
-					setOutputState(&m, "Private Key", output)
-				case "new_hd_wallet":
-					output, _ := hdwallet.NewMnemonic(128)
-					setOutputState(&m, "Mnemonic Words (seperated by space), SAVE IT somewhere safe", output)
-					m.setInState("new_hd_wallet_output")
-				case "pk":
-					setInputState(&m, "Private Key", "Private key")
-				case "sign_message":
-					setInputState(&m, "Sign Message", "Message to sign")
-				case "save_keystore":
-					setInputState(&m, "Save Keystore", "Password")
-				case "provider_options":
-					m.loadListItems(getProviderItems(m), "Query Chain")
-				case "account_bal":
-					m.title = "Account Balance"
-					balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
-					eth_value := eth.GetEthValue(balance)
-					output := fmt.Sprintf("Balance is: %v", eth_value)
-					setOutputState(&m, "Account Balance", output)
-				case "query_bal":
-					setInputState(&m, "Query Balance", "Address")
-				case "send_tx":
-					setInputState(&m, "Send Transaction", "Signed Transaction Hash")
-				case "back":
-					loadWalletState(&m, m.walletData)
-				}
-
 				if ok {
+					m.setState(item.id)
+					if m.state == "quit" {
+						quitToMainMenu(&m)
+					}
+
+					switch item.id {
+					case "sign_transaction":
+						m.setMultiInputView()
+					case "keystore_access":
+						m.setMultiInputViewKeystoreFile()
+					case "mnemonic":
+						m.title = "Mnemonic Words (seperated by space)"
+						setInputState(&m, "Mnemonic Words (seperated by space)", "airport loud mixture")
+					case "access_wallet":
+						m.loadListItems(getAccessWalletItems(), "Access Wallet")
+					case "new_wallet":
+						walletData := eth.GenerateWallet()
+						loadWalletState(&m, walletData)
+					case "public_key":
+						output := displayWalletPublicKey(m.walletData)
+						setOutputState(&m, "Public Key", output)
+					case "private_key":
+						output := displayWalletPrivateKey(m.walletData)
+						setOutputState(&m, "Private Key", output)
+					case "new_hd_wallet":
+						output, _ := hdwallet.NewMnemonic(128)
+						setOutputState(&m, "Mnemonic Words (seperated by space), SAVE IT somewhere safe", output)
+						m.setInState("new_hd_wallet_output")
+					case "pk":
+						setInputState(&m, "Private Key", "Private key")
+					case "sign_message":
+						setInputState(&m, "Sign Message", "Message to sign")
+					case "save_keystore":
+						setInputState(&m, "Save Keystore", "Password")
+					case "provider_options":
+						m.loadListItems(getProviderItems(m), "Query Chain")
+					case "account_bal":
+						m.title = "Account Balance"
+						balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
+						eth_value := eth.GetEthValue(balance)
+						output := fmt.Sprintf("Balance is: %v", eth_value)
+						setOutputState(&m, "Account Balance", output)
+					case "query_bal":
+						setInputState(&m, "Query Balance", "Address")
+					case "send_tx":
+						setInputState(&m, "Send Transaction", "Signed Transaction Hash")
+					case "back":
+						loadWalletState(&m, m.walletData)
+					}
+					m.setInState(item.id)
 					m.choice = item
 				}
-				m.setInState(item.id)
 			}
 		}
 
