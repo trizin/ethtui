@@ -24,6 +24,12 @@ type WalletData struct {
 }
 
 func GetWalletFromPK(pk string) WalletData {
+	// check if starts with 0x
+	if pk[:2] == "0x" {
+		// remove 0x
+		pk = pk[2:]
+	}
+
 	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
 		panic(err)
@@ -81,26 +87,33 @@ func LoadKeystore(path string, password string) WalletData {
 }
 
 func (w WalletData) SignTransaction(
-	nonce int,
+	nonce uint64,
 	toAddress string,
 	value float64,
 	gasLimit int,
 	gasPrice float64,
 	data string,
+	chainId int64,
+	gasTipCap float64,
 ) string {
-	tx := types.NewTransaction(
-		uint64(nonce),
-		common.HexToAddress(toAddress),
-		big.NewInt(int64(value*1e18)),
-		uint64(gasLimit),
-		big.NewInt(int64(gasPrice*1e9)),
-		[]byte(data),
+	addr := common.HexToAddress(toAddress)
+	tx := types.NewTx(
+		&types.DynamicFeeTx{
+			ChainID:   big.NewInt(chainId),
+			Nonce:     uint64(nonce),
+			To:        &addr,
+			Value:     big.NewInt(int64(value * 1e18)),
+			GasFeeCap: big.NewInt(int64(gasPrice * 1e9)),
+			GasTipCap: big.NewInt(int64(gasTipCap * 1e9)),
+			Gas:       uint64(gasLimit),
+			Data:      []byte(data),
+		},
 	)
 	privateKey := w.PrivateKeyECDSA()
 
 	signedTx, err := types.SignTx(
 		tx,
-		types.NewEIP155Signer(nil), privateKey,
+		types.LatestSignerForChainID(big.NewInt(chainId)), privateKey,
 	)
 	if err != nil {
 		panic(err)
