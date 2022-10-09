@@ -112,22 +112,10 @@ func (m UI) View() string {
 			return b.String()
 
 		case "input":
-			return docStyle.Render(fmt.Sprintf(
-				"%s\n%s\n%s",
-				titleStyle.Render(m.title),
-				m.input.View(),
-				blurredStyle.Render("Press c to cancel"),
-			))
+			return renderInput(m)
 
 		case "output":
-			in := fmt.Sprintf(
-				"%s\n%s\n%s",
-				titleStyle.Render(m.title),
-				docStyle.Render(m.output),
-				blurredStyle.Render("Press enter to continue"),
-			)
-
-			return docStyle.Render(in)
+			return renderOutput(m)
 		}
 	}
 

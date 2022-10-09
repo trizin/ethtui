@@ -29,3 +29,21 @@ func getText(placeHolder string) textinput.Model {
 	ti.Focus()
 	return ti
 }
+
+func renderInput(m UI) string {
+	return docStyle.Render(fmt.Sprintf(
+		"%s\n%s\n%s",
+		titleStyle.Render(m.title),
+		m.input.View(),
+		blurredStyle.Render("Press c to cancel"),
+	))
+}
+
+func renderOutput(m UI) string {
+	return docStyle.Render(fmt.Sprintf(
+		"%s\n%s\n%s",
+		titleStyle.Render(m.title),
+		docStyle.Render(m.output),
+		blurredStyle.Render("Press enter to continue"),
+	))
+}
