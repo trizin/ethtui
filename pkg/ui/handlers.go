@@ -111,7 +111,10 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 	} else if m.state == "keystore_access" {
 		path := m.multiInput[0].Value()
 		password := m.multiInput[1].Value()
-		walletData := eth.LoadKeystore(path, password)
+		walletData, err := eth.LoadKeystore(path, password)
+		if handleError(&m, err) {
+			return m, nil
+		}
 		loadWalletState(&m, walletData)
 	} else if m.state == "hdwallet" {
 		item, ok := m.list.SelectedItem().(ListItem)

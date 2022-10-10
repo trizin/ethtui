@@ -3,6 +3,7 @@ package eth
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"errors"
 	"io/ioutil"
 	"math/big"
 
@@ -60,29 +61,29 @@ func (w WalletData) CreateKeystore(password string) string {
 	return fileName
 }
 
-func LoadKeystore(path string, password string) WalletData {
+func LoadKeystore(path string, password string) (WalletData, error) {
 	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
 	accounts := ks.Accounts()
 	if len(accounts) == 0 {
-		panic("No accounts found in keystore")
+		return WalletData{}, errors.New("no accounts found in keystore")
 	}
 	account := accounts[0]
 
 	keyjson, err := ioutil.ReadFile(account.URL.Path)
 	if err != nil {
-		panic(err)
+		return WalletData{}, err
 	}
 
 	key, err := keystore.DecryptKey(keyjson, password)
 	if err != nil {
-		panic(err)
+		return WalletData{}, err
 	}
 
 	if key.Address != account.Address {
-		panic("Key address mismatch")
+		return WalletData{}, errors.New("address mismatch")
 	}
 
-	return GetWalletDataFromPKECDSA(key.PrivateKey)
+	return GetWalletDataFromPKECDSA(key.PrivateKey), nil
 
 }
 
