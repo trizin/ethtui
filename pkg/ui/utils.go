@@ -65,3 +65,11 @@ func renderMultiInput(m UI) string {
 	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 	return b.String()
 }
+
+func handleError(m *UI, err error) bool {
+	if err != nil {
+		setOutputState(m, "Error", err.Error())
+		return true
+	}
+	return false
+}

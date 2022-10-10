@@ -125,14 +125,14 @@ func (w WalletData) SignTransaction(
 	return hexutil.Encode(buff.Bytes())
 }
 
-func (w WalletData) SignMessage(dataString string) string {
+func (w WalletData) SignMessage(dataString string) (string, error) {
 	data := []byte(dataString)
 	hash := crypto.Keccak256Hash(data)
 	signature, err := crypto.Sign(hash.Bytes(), w.PrivateKeyECDSA())
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return hexutil.Encode(signature)
+	return hexutil.Encode(signature), nil
 }
 
 func GetWalletDataFromPKECDSA(privateKey *ecdsa.PrivateKey) WalletData {

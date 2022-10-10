@@ -15,8 +15,7 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 		if m.getInState() == "new_hd_wallet_output" {
 			mnm := m.output
 			hdwallet, err := hd.NewHDWallet(mnm)
-			if err != nil {
-				setOutputState(&m, "Error", err.Error())
+			if handleError(&m, err) {
 				return m, nil
 			}
 			m.hdWallet = hdwallet
@@ -32,41 +31,38 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 		case "pk":
 			privateKey := m.getInputValue()
 			walletData, err := eth.GetWalletFromPK(privateKey)
-			if err != nil {
-				setOutputState(&m, "Error", err.Error())
+			if handleError(&m, err) {
 				return m, nil
 			}
 			loadWalletState(&m, walletData)
 		case "mnemonic":
 			mnm := m.getInputValue()
 			hdwallet, err := hd.NewHDWallet(mnm)
-			if err != nil {
-				setOutputState(&m, "Error", err.Error())
+			if handleError(&m, err) {
 				return m, nil
 			}
 			m.hdWallet = hdwallet
 			m.loadHDWallet()
 		case "sign_message":
 			message := m.getInputValue()
-			signedMessage := m.walletData.SignMessage(message)
+			signedMessage, err := m.walletData.SignMessage(message)
+			if handleError(&m, err) {
+				return m, nil
+			}
 			setOutputState(
 				&m, "Signed Message", signedMessage,
 			)
 		case "send_tx":
 			signedTx := m.getInputValue()
 			txHash, err := m.provider.SendSignedTransaction(signedTx)
-			var output string
-			if err != nil {
-				output = fmt.Sprintf("Error: %s", err)
-			} else {
-				output = txHash
+			if handleError(&m, err) {
+				return m, nil
 			}
-			setOutputState(&m, "Transaction hash", output)
+			setOutputState(&m, "Transaction hash", txHash)
 		case "query_bal":
 			addr := m.getInputValue()
 			balance, err := m.provider.GetBalance(addr, 0)
-			if err != nil {
-				setOutputState(&m, "Error", err.Error())
+			if handleError(&m, err) {
 				return m, nil
 			}
 			eth_value := eth.GetEthValue(balance)
@@ -75,20 +71,19 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 		case "query_tx":
 			txHash := m.getInputValue()
 			output, err := eth.GetTransactionInfoString(m.provider, txHash)
-			if err != nil {
-				output = fmt.Sprintf("Error: %s", err)
+			if handleError(&m, err) {
+				return m, nil
 			}
 			setOutputState(&m, "Transaction Info", output)
 
 		case "query_block":
 			blockNumber, err := strconv.ParseInt(m.getInputValue(), 10, 64)
-			if err != nil {
-				setOutputState(&m, "Block Info (error)", err.Error())
+			if handleError(&m, err) {
 				return m, nil
 			}
 			output, err := eth.GetBlockInfoString(m.provider, uint64(blockNumber))
-			if err != nil {
-				output = fmt.Sprintf("Error: %s", err)
+			if handleError(&m, err) {
+				return m, nil
 			}
 
 			setOutputState(&m, "Block Info", output)
@@ -99,12 +94,11 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			setOutputState(&m, "Keystore file saved", "Path: "+keystoreFile)
 		case "update_provider":
 			p, err := eth.GetProvider(m.getInputValue())
-			if err != nil {
-				setOutputState(&m, "Error", err.Error())
-			} else {
-				m.provider = p
-				loadWalletState(&m, m.walletData)
+			if handleError(&m, err) {
+				return m, nil
 			}
+			m.provider = p
+			loadWalletState(&m, m.walletData)
 
 		}
 
@@ -180,8 +174,7 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 				m.loadListItems(getProviderItems(m), "Query Chain")
 			case "account_bal":
 				balance, err := m.provider.GetBalance(m.walletData.PublicKey, 0)
-				if err != nil {
-					setOutputState(&m, "Error", err.Error())
+				if handleError(&m, err) {
 					return m, nil
 				}
 				eth_value := eth.GetEthValue(balance)
