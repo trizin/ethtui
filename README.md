@@ -35,3 +35,5 @@ To access chain data, you need to specify an RPC endpoint. You can do it by pres
 ![gif](.github/img/part1.gif)
 
 ![gif](.github/img/part2.gif)
+
+![gif](.github/img/sendtx.gif)
