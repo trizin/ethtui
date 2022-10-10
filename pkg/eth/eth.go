@@ -51,14 +51,14 @@ func (w WalletData) PrivateKeyECDSA() *ecdsa.PrivateKey {
 	return data
 }
 
-func (w WalletData) CreateKeystore(password string) string {
+func (w WalletData) CreateKeystore(password string) (string, error) {
 	fileName := "./" + w.PublicKey + ".keystore"
 	ks := keystore.NewKeyStore(fileName, keystore.StandardScryptN, keystore.StandardScryptP)
 	_, err := ks.ImportECDSA(w.PrivateKeyECDSA(), password)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return fileName
+	return fileName, nil
 }
 
 func LoadKeystore(path string, password string) (WalletData, error) {
