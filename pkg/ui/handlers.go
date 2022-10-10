@@ -14,7 +14,12 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 	if m.state == "new_wallet" || m.state == "get_info_wallet" || m.state == "output" {
 		if m.getInState() == "new_hd_wallet_output" {
 			mnm := m.output
-			m.hdWallet = hd.NewHDWallet(mnm)
+			hdwallet, err := hd.NewHDWallet(mnm)
+			if err != nil {
+				setOutputState(&m, "Error", err.Error())
+				return m, nil
+			}
+			m.hdWallet = hdwallet
 			m.loadHDWallet()
 			m.setInState("")
 			return m, nil
@@ -30,7 +35,12 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			loadWalletState(&m, walletData)
 		case "mnemonic":
 			mnm := m.getInputValue()
-			m.hdWallet = hd.NewHDWallet(mnm)
+			hdwallet, err := hd.NewHDWallet(mnm)
+			if err != nil {
+				setOutputState(&m, "Error", err.Error())
+				return m, nil
+			}
+			m.hdWallet = hdwallet
 			m.loadHDWallet()
 		case "sign_message":
 			message := m.getInputValue()

@@ -7,7 +7,7 @@ import (
 func TestNewHDWallet(t *testing.T) {
 	t.Run("Test new HDWallet", func(t *testing.T) {
 		mnemonic := "tag volcano eight thank tide danger coast health above argue embrace heavy"
-		wallet := NewHDWallet(mnemonic)
+		wallet, _ := NewHDWallet(mnemonic)
 		if wallet == nil {
 			t.Errorf("NewHDWallet() = %v, want %v", wallet, nil)
 		}
@@ -18,7 +18,7 @@ func TestNewHDWallet(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	t.Run("Test get accounts", func(t *testing.T) {
 		mnemonic := "tag volcano eight thank tide danger coast health above argue embrace heavy"
-		wallet := NewHDWallet(mnemonic)
+		wallet, _ := NewHDWallet(mnemonic)
 		if wallet == nil {
 			t.Errorf("NewHDWallet() = %v, want %v", wallet, nil)
 		}
@@ -39,7 +39,7 @@ func TestGetAccount(t *testing.T) {
 func TestGetAccountByIndex(t *testing.T) {
 	t.Run("Test get account by index", func(t *testing.T) {
 		mnemonic := "tag volcano eight thank tide danger coast health above argue embrace heavy"
-		wallet := NewHDWallet(mnemonic)
+		wallet, _ := NewHDWallet(mnemonic)
 		if wallet == nil {
 			t.Errorf("NewHDWallet() = %v, want %v", wallet, nil)
 		}
