@@ -45,9 +45,9 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			if err != nil {
 				output = fmt.Sprintf("Error: %s", err)
 			} else {
-				output = fmt.Sprintf("Transaction hash: %s", txHash)
+				output = txHash
 			}
-			setOutputState(&m, "Send Transaction", output)
+			setOutputState(&m, "Transaction hash", output)
 		case "query_bal":
 			addr := m.getInputValue()
 			balance := m.provider.GetBalance(addr, 0)

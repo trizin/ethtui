@@ -52,11 +52,18 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				gasTipCapFloat := eth.GetGweiValue(gasTipCap)
 
 				m.multiInput[7].SetValue(fmt.Sprintf("%f", gasTipCapFloat))
+				m.multiInput[7].Blur()
 				m.multiInput[6].SetValue(fmt.Sprintf("%d", chainId))
+				m.multiInput[6].Blur()
 				m.multiInput[4].SetValue(fmt.Sprintf("%f", gasPriceFloat))
+				m.multiInput[4].Blur()
 				m.multiInput[3].SetValue(fmt.Sprintf("%d", gasLimit))
+				m.multiInput[3].Blur()
 				m.multiInput[0].SetValue(fmt.Sprintf("%d", nonce))
+				m.multiInput[0].Blur()
+				m.multiInput[m.focusIndex].Focus()
 			}
+			return m, cmd
 
 		case "ctrl+c":
 			return m, tea.Quit
