@@ -80,8 +80,14 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			keystoreFile := m.walletData.CreateKeystore(password)
 			setOutputState(&m, "Keystore file saved", "Path: "+keystoreFile)
 		case "update_provider":
-			m.provider = eth.GetProvider(m.getInputValue())
-			loadWalletState(&m, m.walletData)
+			p, err := eth.GetProvider(m.getInputValue())
+			if err != nil {
+				setOutputState(&m, "Error", err.Error())
+			} else {
+				m.provider = p
+				loadWalletState(&m, m.walletData)
+			}
+
 		}
 
 	} else if m.state == "sign_transaction" {

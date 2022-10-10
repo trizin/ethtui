@@ -16,12 +16,12 @@ type Provider struct {
 	Client *ethclient.Client
 }
 
-func GetProvider(url string) *Provider {
+func GetProvider(url string) (*Provider, error) {
 	client, err := ethclient.Dial(url)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &Provider{client}
+	return &Provider{client}, nil
 }
 
 func (p Provider) SendSignedTransaction(signedhash string) (string, error) {

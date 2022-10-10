@@ -10,7 +10,11 @@ var rpcUrl = "https://rpc.ankr.com/eth"
 
 func TestProvider_GetBalance(t *testing.T) {
 
-	provider := GetProvider(rpcUrl)
+	provider, err := GetProvider(rpcUrl)
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 	addr := "0x000000000000000000000000000000000000dEaD"
 
 	t.Run("Get balance at block", func(t *testing.T) {
@@ -29,7 +33,11 @@ func TestProvider_GetBalance(t *testing.T) {
 }
 
 func TestGetTransactionReceipt(t *testing.T) {
-	provider := GetProvider(rpcUrl)
+	provider, err := GetProvider(rpcUrl)
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 	txHash := "0x82237a9d319cbb9a46d1bbbdbac870918e70ae9f0350db24dc578c1a5cf4d859"
 
 	receipt, err := provider.GetTransactionReceipt(txHash)
@@ -60,7 +68,11 @@ func TestGetTransactionReceipt(t *testing.T) {
 }
 
 func TestGetTransactionInfo(t *testing.T) {
-	provider := GetProvider(rpcUrl)
+	provider, err := GetProvider(rpcUrl)
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 	txHash := "0x82237a9d319cbb9a46d1bbbdbac870918e70ae9f0350db24dc578c1a5cf4d859"
 
 	tx, pending, err := provider.GetTransactionInfo(txHash)
@@ -107,7 +119,11 @@ func TestGetTransactionInfo(t *testing.T) {
 }
 
 func TestGetNonce(t *testing.T) {
-	provider := GetProvider(rpcUrl)
+	provider, err := GetProvider(rpcUrl)
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 	addr := "0x000000000000000000000000000000000000dEaD"
 
 	expected := uint64(0)
@@ -124,7 +140,11 @@ func TestGetNonce(t *testing.T) {
 func TestSignAndSendTransaction(t *testing.T) {
 	pk := "0x7477652b0d4f24e0b5cfdc60f49e4f58deb7c8781cdf92079b5cb17515615de7"
 	wallet := GetWalletFromPK(pk)
-	provider := GetProvider("http://localhost:8545")
+	provider, err := GetProvider("http://localhost:8545")
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 	addr := "0x000000000000000000000000000000000000dEaD"
 	sender := wallet.PublicKey
 	chainId, err := provider.GetChainId()
@@ -174,7 +194,11 @@ func TestSignAndSendTransaction(t *testing.T) {
 }
 
 func TestGetEstimatedGasUsage(t *testing.T) {
-	provider := GetProvider(rpcUrl)
+	provider, err := GetProvider(rpcUrl)
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 
 	gas, err := provider.GetEstimatedGasUsage([]byte("0x"))
 
@@ -189,7 +213,11 @@ func TestGetEstimatedGasUsage(t *testing.T) {
 }
 
 func TestGetGasPrice(t *testing.T) {
-	provider := GetProvider(rpcUrl)
+	provider, err := GetProvider(rpcUrl)
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 
 	gasPrice, err := provider.GetGasPrice()
 
@@ -204,7 +232,11 @@ func TestGetGasPrice(t *testing.T) {
 }
 
 func TestGetGasTip(t *testing.T) {
-	provider := GetProvider(rpcUrl)
+	provider, err := GetProvider(rpcUrl)
+	if err != nil {
+		t.Errorf("GetProvider() error = %v", err)
+		return
+	}
 
 	gasTip, err := provider.GetGasTipCap()
 
