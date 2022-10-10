@@ -50,7 +50,11 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			setOutputState(&m, "Transaction hash", output)
 		case "query_bal":
 			addr := m.getInputValue()
-			balance := m.provider.GetBalance(addr, 0)
+			balance, err := m.provider.GetBalance(addr, 0)
+			if err != nil {
+				setOutputState(&m, "Error", err.Error())
+				return m, nil
+			}
 			eth_value := eth.GetEthValue(balance)
 			output := fmt.Sprintf("Balance is: %v", eth_value)
 			setOutputState(&m, "Account Balance", output)
@@ -161,7 +165,11 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			case "provider_options":
 				m.loadListItems(getProviderItems(m), "Query Chain")
 			case "account_bal":
-				balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
+				balance, err := m.provider.GetBalance(m.walletData.PublicKey, 0)
+				if err != nil {
+					setOutputState(&m, "Error", err.Error())
+					return m, nil
+				}
 				eth_value := eth.GetEthValue(balance)
 				output := fmt.Sprintf("Balance is: %v", eth_value)
 				setOutputState(&m, "Account Balance", output)

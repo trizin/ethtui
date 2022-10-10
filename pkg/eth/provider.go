@@ -42,7 +42,7 @@ func (p Provider) SendSignedTransaction(signedhash string) (string, error) {
 	return tx.Hash().String(), nil
 }
 
-func (p Provider) GetBalance(address string, blockNumber uint64) *big.Int {
+func (p Provider) GetBalance(address string, blockNumber uint64) (*big.Int, error) {
 	addr := common.HexToAddress(address)
 
 	var bigInt *big.Int
@@ -55,10 +55,10 @@ func (p Provider) GetBalance(address string, blockNumber uint64) *big.Int {
 		addr, bigInt,
 	)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return bal
+	return bal, nil
 }
 
 func (p Provider) GetTransactionReceipt(hash string) (*types.Receipt, error) {

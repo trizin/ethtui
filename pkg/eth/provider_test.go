@@ -19,13 +19,13 @@ func TestProvider_GetBalance(t *testing.T) {
 
 	t.Run("Get balance at block", func(t *testing.T) {
 		expected := "12567984693887489302095"
-		got := provider.GetBalance(addr, 15705799).String()
-		if got != expected {
+		got, _ := provider.GetBalance(addr, 15705799)
+		if got.String() != expected {
 			t.Errorf("Provider.GetBalance() at block = %v, want %v", got, expected)
 		}
 	})
 	t.Run("Get last balance", func(t *testing.T) {
-		got := provider.GetBalance(addr, 0)
+		got, _ := provider.GetBalance(addr, 0)
 		if got.Cmp(big.NewInt(0)) != 1 {
 			t.Errorf("Provider.GetBalance() last balance failed")
 		}
@@ -168,13 +168,13 @@ func TestSignAndSendTransaction(t *testing.T) {
 		2,
 	)
 
-	balSender := provider.GetBalance(sender, 0)
+	balSender, _ := provider.GetBalance(sender, 0)
 	if balSender.Cmp(big.NewInt(0)) != 1 {
 		t.Errorf("Provider.GetBalance() not enough balance")
 		return
 	}
 
-	beforebal := provider.GetBalance(addr, 0)
+	beforebal, _ := provider.GetBalance(addr, 0)
 	txHash, err := provider.SendSignedTransaction(signedTx)
 
 	if err != nil {
@@ -182,7 +182,7 @@ func TestSignAndSendTransaction(t *testing.T) {
 		return
 	}
 
-	afterbal := provider.GetBalance(addr, 0)
+	afterbal, _ := provider.GetBalance(addr, 0)
 
 	if txHash == "" {
 		t.Errorf("Provider.SendTransaction() tx hash = %v", txHash)
