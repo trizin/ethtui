@@ -6,7 +6,7 @@ import (
 
 func TestWalletData_SignTransaction(t *testing.T) {
 	wallet := GenerateWallet()
-	signed := wallet.SignTransaction(
+	signed, err := wallet.SignTransaction(
 		0,
 		"0x000000000000000000000000000000000000dEaD",
 		10,
@@ -16,6 +16,11 @@ func TestWalletData_SignTransaction(t *testing.T) {
 		1,
 		2,
 	)
+
+	if err != nil {
+		t.Errorf("WalletData.SignTransaction() error = %v", err)
+		return
+	}
 
 	if signed == "" {
 		t.Errorf("WalletData.SignTransaction() = %v", signed)

@@ -107,7 +107,10 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 
 	} else if m.state == "sign_transaction" {
 		if m.focusIndex == len(m.multiInput) {
-			signedTransaction := signTransaction(m)
+			signedTransaction, err := signTransaction(m)
+			if handleError(&m, err) {
+				return m, nil
+			}
 			setOutputState(&m, "Signed Transaction Hash", signedTransaction)
 			m.setMultiInputView()
 		}

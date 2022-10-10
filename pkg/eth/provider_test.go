@@ -157,7 +157,7 @@ func TestSignAndSendTransaction(t *testing.T) {
 		t.Errorf("Provider.GetNonce() error = %v", err)
 		return
 	}
-	signedTx := wallet.SignTransaction(
+	signedTx, _ := wallet.SignTransaction(
 		nonce,
 		addr,
 		1.0,

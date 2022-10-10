@@ -96,7 +96,7 @@ func (w WalletData) SignTransaction(
 	data string,
 	chainId int64,
 	gasTipCap float64,
-) string {
+) (string, error) {
 	addr := common.HexToAddress(toAddress)
 	tx := types.NewTx(
 		&types.DynamicFeeTx{
@@ -117,13 +117,13 @@ func (w WalletData) SignTransaction(
 		types.LatestSignerForChainID(big.NewInt(chainId)), privateKey,
 	)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	var buff bytes.Buffer
 	signedTx.EncodeRLP(&buff)
 
-	return hexutil.Encode(buff.Bytes())
+	return hexutil.Encode(buff.Bytes()), nil
 }
 
 func (w WalletData) SignMessage(dataString string) (string, error) {
