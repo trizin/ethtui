@@ -41,9 +41,15 @@ func renderInput(m UI) string {
 }
 
 func renderOutput(m UI) string {
+	title := titleStyle.Render(m.title)
+
+	if m.title == "Error" {
+		title = errorTitleStyle.Render(m.title)
+	}
+
 	return docStyle.Render(fmt.Sprintf(
 		"%s\n%s\n%s\n%s",
-		titleStyle.Render(m.title),
+		title,
 		docStyle.Render(m.output),
 		blurredStyle.Render("Press enter to continue"),
 		blurredStyle.Render("Press c to copy to clipboard"),
