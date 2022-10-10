@@ -139,7 +139,7 @@ func TestGetNonce(t *testing.T) {
 
 func TestSignAndSendTransaction(t *testing.T) {
 	pk := "0x7477652b0d4f24e0b5cfdc60f49e4f58deb7c8781cdf92079b5cb17515615de7"
-	wallet := GetWalletFromPK(pk)
+	wallet, _ := GetWalletFromPK(pk)
 	provider, err := GetProvider("http://localhost:8545")
 	if err != nil {
 		t.Errorf("GetProvider() error = %v", err)

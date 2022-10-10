@@ -31,7 +31,11 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 		switch instate {
 		case "pk":
 			privateKey := m.getInputValue()
-			walletData := eth.GetWalletFromPK(privateKey)
+			walletData, err := eth.GetWalletFromPK(privateKey)
+			if err != nil {
+				setOutputState(&m, "Error", err.Error())
+				return m, nil
+			}
 			loadWalletState(&m, walletData)
 		case "mnemonic":
 			mnm := m.getInputValue()
@@ -123,8 +127,8 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 				m.hdWallet = nil
 			} else {
 				index, _ := strconv.Atoi(item.id)
-				privateKey := m.hdWallet.GetAccount(index).PrivateKey
-				loadWalletState(&m, eth.GetWalletFromPK(privateKey))
+				walletData := m.hdWallet.GetAccount(index)
+				loadWalletState(&m, walletData)
 			}
 		}
 

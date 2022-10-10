@@ -23,7 +23,7 @@ type WalletData struct {
 	PublicKeyQR  *qrcode.QRCode
 }
 
-func GetWalletFromPK(pk string) WalletData {
+func GetWalletFromPK(pk string) (WalletData, error) {
 	// check if starts with 0x
 	if pk[:2] == "0x" {
 		// remove 0x
@@ -32,9 +32,9 @@ func GetWalletFromPK(pk string) WalletData {
 
 	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
-		panic(err)
+		return WalletData{}, err
 	}
-	return GetWalletDataFromPKECDSA(privateKey)
+	return GetWalletDataFromPKECDSA(privateKey), nil
 }
 
 func GenerateWallet() WalletData {

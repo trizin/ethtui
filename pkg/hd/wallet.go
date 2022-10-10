@@ -34,7 +34,7 @@ func (w *HDWallet) GetAccount(index int) eth.WalletData {
 		panic(err)
 	}
 
-	wallet := eth.GetWalletFromPK(privateKeyHex)
+	wallet, _ := eth.GetWalletFromPK(privateKeyHex)
 	return wallet
 }
 
