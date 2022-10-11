@@ -35,14 +35,16 @@ To access chain data, you need to specify an RPC endpoint. You can do it by pres
 ### Wallet Management
 
 
-![gif](.github/img/part1.gif)
-
-### Wallet Access
+![gif](.github/img/part1.gif)  
 
 
-![gif](.github/img/part2.gif)
+### Wallet Access
 
-### Sending Transactions
+
+![gif](.github/img/part2.gif)  
+
+
+### Sending Transactions
 
 
 ![gif](.github/img/sendtx.gif)
