@@ -61,7 +61,11 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.multiInput[3].Blur()
 				m.multiInput[0].SetValue(fmt.Sprintf("%d", nonce))
 				m.multiInput[0].Blur()
-				m.multiInput[m.focusIndex].Focus()
+				if m.focusIndex < 8 {
+					m.multiInput[m.focusIndex].Focus()
+				}else{
+					m.multiInput[1].Focus()
+				}
 			}
 			return m, cmd
 

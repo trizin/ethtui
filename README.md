@@ -32,8 +32,19 @@ $ go build .
 
 To access chain data, you need to specify an RPC endpoint. You can do it by pressing "ctrl+p" in the wallet management menu and entering the URL.
 
-![gif](.github/img/part1.gif)
+### Wallet Management
 
-![gif](.github/img/part2.gif)
+
+![gif](.github/img/part1.gif)  
+
+
+### Wallet Access
+
+
+![gif](.github/img/part2.gif)  
+
+
+### Sending Transactions
+
 
 ![gif](.github/img/sendtx.gif)
