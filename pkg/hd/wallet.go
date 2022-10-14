@@ -34,7 +34,7 @@ func (w *HDWallet) GetAccount(index int) eth.WalletData {
 		panic(err)
 	}
 
-	wallet := eth.GetWalletFromPK(privateKeyHex)
+	wallet, _ := eth.GetWalletFromPK(privateKeyHex)
 	return wallet
 }
 
@@ -53,10 +53,10 @@ func (w *HDWallet) GetAddresses(
 	return addresses
 }
 
-func NewHDWallet(mnemonic string) *HDWallet {
+func NewHDWallet(mnemonic string) (*HDWallet, error) {
 	wallet, err := hdwallet.NewFromMnemonic(mnemonic)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &HDWallet{wallet}
+	return &HDWallet{wallet}, nil
 }

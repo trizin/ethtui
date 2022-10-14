@@ -43,7 +43,7 @@ func moveIndex(m UI, s string) (UI, []tea.Cmd) {
 	return m, cmds
 }
 
-func signTransaction(m UI) string {
+func signTransaction(m UI) (string, error) {
 	nonce, _ := strconv.Atoi(m.multiInput[0].Value())
 	toAddress := m.multiInput[1].Value()
 	value, _ := strconv.ParseFloat(m.multiInput[2].Value(), 64)
@@ -53,8 +53,12 @@ func signTransaction(m UI) string {
 	chainId, _ := strconv.Atoi(m.multiInput[6].Value())
 	gasTipCap, _ := strconv.ParseFloat(m.multiInput[7].Value(), 64)
 
-	signedTransaction := m.walletData.SignTransaction(uint64(nonce), toAddress, value, gasLimit, gasPrice, data, int64(chainId), gasTipCap)
-	return signedTransaction
+	signedTransaction, err := m.walletData.SignTransaction(uint64(nonce), toAddress, value, gasLimit, gasPrice, data, int64(chainId), gasTipCap)
+	if err != nil {
+		return "", err
+	}
+
+	return signedTransaction, nil
 }
 
 func setOutputState(m *UI, title string, output string) {

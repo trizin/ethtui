@@ -14,7 +14,11 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 	if m.state == "new_wallet" || m.state == "get_info_wallet" || m.state == "output" {
 		if m.getInState() == "new_hd_wallet_output" {
 			mnm := m.output
-			m.hdWallet = hd.NewHDWallet(mnm)
+			hdwallet, err := hd.NewHDWallet(mnm)
+			if handleError(&m, err) {
+				return m, nil
+			}
+			m.hdWallet = hdwallet
 			m.loadHDWallet()
 			m.setInState("")
 			return m, nil
@@ -26,74 +30,97 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 		switch instate {
 		case "pk":
 			privateKey := m.getInputValue()
-			walletData := eth.GetWalletFromPK(privateKey)
+			walletData, err := eth.GetWalletFromPK(privateKey)
+			if handleError(&m, err) {
+				return m, nil
+			}
 			loadWalletState(&m, walletData)
 		case "mnemonic":
 			mnm := m.getInputValue()
-			m.hdWallet = hd.NewHDWallet(mnm)
+			hdwallet, err := hd.NewHDWallet(mnm)
+			if handleError(&m, err) {
+				return m, nil
+			}
+			m.hdWallet = hdwallet
 			m.loadHDWallet()
 		case "sign_message":
 			message := m.getInputValue()
-			signedMessage := m.walletData.SignMessage(message)
+			signedMessage, err := m.walletData.SignMessage(message)
+			if handleError(&m, err) {
+				return m, nil
+			}
 			setOutputState(
 				&m, "Signed Message", signedMessage,
 			)
 		case "send_tx":
 			signedTx := m.getInputValue()
 			txHash, err := m.provider.SendSignedTransaction(signedTx)
-			var output string
-			if err != nil {
-				output = fmt.Sprintf("Error: %s", err)
-			} else {
-				output = txHash
+			if handleError(&m, err) {
+				return m, nil
 			}
-			setOutputState(&m, "Transaction hash", output)
+			setOutputState(&m, "Transaction hash", txHash)
 		case "query_bal":
 			addr := m.getInputValue()
-			balance := m.provider.GetBalance(addr, 0)
+			balance, err := m.provider.GetBalance(addr, 0)
+			if handleError(&m, err) {
+				return m, nil
+			}
 			eth_value := eth.GetEthValue(balance)
 			output := fmt.Sprintf("Balance is: %v", eth_value)
 			setOutputState(&m, "Account Balance", output)
 		case "query_tx":
 			txHash := m.getInputValue()
 			output, err := eth.GetTransactionInfoString(m.provider, txHash)
-			if err != nil {
-				output = fmt.Sprintf("Error: %s", err)
+			if handleError(&m, err) {
+				return m, nil
 			}
 			setOutputState(&m, "Transaction Info", output)
 
 		case "query_block":
 			blockNumber, err := strconv.ParseInt(m.getInputValue(), 10, 64)
-			if err != nil {
-				setOutputState(&m, "Block Info (error)", err.Error())
+			if handleError(&m, err) {
 				return m, nil
 			}
 			output, err := eth.GetBlockInfoString(m.provider, uint64(blockNumber))
-			if err != nil {
-				output = fmt.Sprintf("Error: %s", err)
+			if handleError(&m, err) {
+				return m, nil
 			}
 
 			setOutputState(&m, "Block Info", output)
 
 		case "save_keystore":
 			password := m.getInputValue()
-			keystoreFile := m.walletData.CreateKeystore(password)
+			keystoreFile, err := m.walletData.CreateKeystore(password)
+			if handleError(&m, err) {
+				return m, nil
+			}
 			setOutputState(&m, "Keystore file saved", "Path: "+keystoreFile)
 		case "update_provider":
-			m.provider = eth.GetProvider(m.getInputValue())
+			p, err := eth.GetProvider(m.getInputValue())
+			if handleError(&m, err) {
+				return m, nil
+			}
+			m.provider = p
 			loadWalletState(&m, m.walletData)
+
 		}
 
 	} else if m.state == "sign_transaction" {
 		if m.focusIndex == len(m.multiInput) {
-			signedTransaction := signTransaction(m)
+			signedTransaction, err := signTransaction(m)
+			if handleError(&m, err) {
+				return m, nil
+			}
 			setOutputState(&m, "Signed Transaction Hash", signedTransaction)
 			m.setMultiInputView()
 		}
 	} else if m.state == "keystore_access" {
 		path := m.multiInput[0].Value()
 		password := m.multiInput[1].Value()
-		walletData := eth.LoadKeystore(path, password)
+		walletData, err := eth.LoadKeystore(path, password)
+		if handleError(&m, err) {
+			return m, nil
+		}
 		loadWalletState(&m, walletData)
 	} else if m.state == "hdwallet" {
 		item, ok := m.list.SelectedItem().(ListItem)
@@ -103,8 +130,8 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 				m.hdWallet = nil
 			} else {
 				index, _ := strconv.Atoi(item.id)
-				privateKey := m.hdWallet.GetAccount(index).PrivateKey
-				loadWalletState(&m, eth.GetWalletFromPK(privateKey))
+				walletData := m.hdWallet.GetAccount(index)
+				loadWalletState(&m, walletData)
 			}
 		}
 
@@ -155,7 +182,10 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			case "provider_options":
 				m.loadListItems(getProviderItems(m), "Query Chain")
 			case "account_bal":
-				balance := m.provider.GetBalance(m.walletData.PublicKey, 0)
+				balance, err := m.provider.GetBalance(m.walletData.PublicKey, 0)
+				if handleError(&m, err) {
+					return m, nil
+				}
 				eth_value := eth.GetEthValue(balance)
 				output := fmt.Sprintf("Balance is: %v", eth_value)
 				setOutputState(&m, "Account Balance", output)

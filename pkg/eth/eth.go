@@ -3,6 +3,7 @@ package eth
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"errors"
 	"io/ioutil"
 	"math/big"
 
@@ -23,7 +24,7 @@ type WalletData struct {
 	PublicKeyQR  *qrcode.QRCode
 }
 
-func GetWalletFromPK(pk string) WalletData {
+func GetWalletFromPK(pk string) (WalletData, error) {
 	// check if starts with 0x
 	if pk[:2] == "0x" {
 		// remove 0x
@@ -32,9 +33,9 @@ func GetWalletFromPK(pk string) WalletData {
 
 	privateKey, err := crypto.HexToECDSA(pk)
 	if err != nil {
-		panic(err)
+		return WalletData{}, err
 	}
-	return GetWalletDataFromPKECDSA(privateKey)
+	return GetWalletDataFromPKECDSA(privateKey), nil
 }
 
 func GenerateWallet() WalletData {
@@ -50,39 +51,39 @@ func (w WalletData) PrivateKeyECDSA() *ecdsa.PrivateKey {
 	return data
 }
 
-func (w WalletData) CreateKeystore(password string) string {
+func (w WalletData) CreateKeystore(password string) (string, error) {
 	fileName := "./" + w.PublicKey + ".keystore"
 	ks := keystore.NewKeyStore(fileName, keystore.StandardScryptN, keystore.StandardScryptP)
 	_, err := ks.ImportECDSA(w.PrivateKeyECDSA(), password)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return fileName
+	return fileName, nil
 }
 
-func LoadKeystore(path string, password string) WalletData {
+func LoadKeystore(path string, password string) (WalletData, error) {
 	ks := keystore.NewKeyStore(path, keystore.StandardScryptN, keystore.StandardScryptP)
 	accounts := ks.Accounts()
 	if len(accounts) == 0 {
-		panic("No accounts found in keystore")
+		return WalletData{}, errors.New("no accounts found in keystore")
 	}
 	account := accounts[0]
 
 	keyjson, err := ioutil.ReadFile(account.URL.Path)
 	if err != nil {
-		panic(err)
+		return WalletData{}, err
 	}
 
 	key, err := keystore.DecryptKey(keyjson, password)
 	if err != nil {
-		panic(err)
+		return WalletData{}, err
 	}
 
 	if key.Address != account.Address {
-		panic("Key address mismatch")
+		return WalletData{}, errors.New("address mismatch")
 	}
 
-	return GetWalletDataFromPKECDSA(key.PrivateKey)
+	return GetWalletDataFromPKECDSA(key.PrivateKey), nil
 
 }
 
@@ -95,7 +96,7 @@ func (w WalletData) SignTransaction(
 	data string,
 	chainId int64,
 	gasTipCap float64,
-) string {
+) (string, error) {
 	addr := common.HexToAddress(toAddress)
 	tx := types.NewTx(
 		&types.DynamicFeeTx{
@@ -116,23 +117,23 @@ func (w WalletData) SignTransaction(
 		types.LatestSignerForChainID(big.NewInt(chainId)), privateKey,
 	)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	var buff bytes.Buffer
 	signedTx.EncodeRLP(&buff)
 
-	return hexutil.Encode(buff.Bytes())
+	return hexutil.Encode(buff.Bytes()), nil
 }
 
-func (w WalletData) SignMessage(dataString string) string {
+func (w WalletData) SignMessage(dataString string) (string, error) {
 	data := []byte(dataString)
 	hash := crypto.Keccak256Hash(data)
 	signature, err := crypto.Sign(hash.Bytes(), w.PrivateKeyECDSA())
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return hexutil.Encode(signature)
+	return hexutil.Encode(signature), nil
 }
 
 func GetWalletDataFromPKECDSA(privateKey *ecdsa.PrivateKey) WalletData {
