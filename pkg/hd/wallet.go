@@ -18,7 +18,7 @@ type HDAccount struct {
 }
 
 func (w *HDWallet) getPathByIndex(index int) accounts.Account {
-	path := hdwallet.MustParseDerivationPath(fmt.Sprintf("m/44'/60'/0'/0/%d", index))
+	path := hdwallet.MustParseDerivationPath(fmt.Sprintf("m/44'/60'/%d'/0/0", index))
 	account, err := w.wallet.Derive(path, true)
 	if err != nil {
 		panic(err)
