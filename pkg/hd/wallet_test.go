@@ -30,7 +30,7 @@ func TestGetAccount(t *testing.T) {
 		if accounts[0].Address != "0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947" {
 			t.Errorf("GetAddresses() = %v, want %v", accounts[0].Address, "0xC49926C4124cEe1cbA0Ea94Ea31a6c12318df947")
 		}
-		if accounts[1].Address != "0x8230645aC28A4EdD1b0B53E7Cd8019744E9dD559" {
+		if accounts[1].Address != "0x6F8f46D4b86A623fD5d12A07847008e8Fc7a9A53" {
 			t.Errorf("GetAddresses() = %v, want %v", accounts[1].Address, "0x8230645aC28A4EdD1b0B53E7Cd8019744E9dD559")
 		}
 	})
