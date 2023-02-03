@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"eth-toolkit/pkg/eth"
-	"eth-toolkit/pkg/hd"
+	"ethtui/pkg/eth"
+	"ethtui/pkg/hd"
 	"fmt"
 	"strconv"
 

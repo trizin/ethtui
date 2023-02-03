@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"eth-toolkit/pkg/ui"
+	"ethtui/pkg/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
@@ -42,7 +42,7 @@ jobs:
       # ==============================
 
       - name: Build Binary for ${{matrix.os}}
-        run: go build -ldflags "-s -w" . 
+        run: go build -ldflags "-s -w" .
 
       # ==============================
       #       Upload artifacts
@@ -53,22 +53,22 @@ jobs:
         if: matrix.os == 'ubuntu-20.04'
         with:
           name: linux
-          path: ./eth-toolkit
+          path: ./ethtui
 
       - name: Upload MacOS Build
         uses: actions/upload-artifact@v2
         if: matrix.os == 'macos-11'
         with:
           name: macos
-          path: ./eth-toolkit
-      
+          path: ./ethtui
+
       - name: Upload Windows Build
         uses: actions/upload-artifact@v2
         if: matrix.os == 'windows-2019'
         with:
           name: windows
-          path: ./eth-toolkit.exe
-  
+          path: ./ethtui.exe
+
   release:
     name: Create Release
     needs: build
@@ -84,20 +84,18 @@ jobs:
         with:
           name: linux
           path: ./linux
-      
+
       - name: Download MacOS Build
         uses: actions/download-artifact@v2
         with:
           name: macos
           path: ./macos
-    
 
       - name: Download Windows Build
         uses: actions/download-artifact@v2
         with:
           name: windows
           path: ./windows
-
 
       # Create release
 
@@ -111,7 +109,7 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      
+
       # Upload artifacts
       - name: Upload Linux Build
         uses: actions/upload-release-asset@v1
@@ -119,18 +117,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux/eth-toolkit
-          asset_name: eth-toolkit-linux
+          asset_path: ./linux/ethtui
+          asset_name: ethtui-linux
           asset_content_type: application/octet-stream
-      
+
       - name: Upload MacOS Build
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos/eth-toolkit
-          asset_name: eth-toolkit-macos
+          asset_path: ./macos/ethtui
+          asset_name: ethtui-macos
           asset_content_type: application/octet-stream
 
       - name: Upload Windows Build
@@ -139,6 +137,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/eth-toolkit.exe
-          asset_name: eth-toolkit-windows.exe
+          asset_path: ./windows/ethtui.exe
+          asset_name: ethtui-windows.exe
           asset_content_type: application/octet-stream

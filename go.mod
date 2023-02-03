@@ -1,4 +1,4 @@
-module eth-toolkit
+module ethtui
 
 go 1.18
 
