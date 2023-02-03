@@ -1,4 +1,4 @@
-# ETH Wallet Toolkit
+# ethercli
 
 TUI toolkit to easily create & manage Ethereum wallets, written in Go.
 
@@ -6,12 +6,12 @@ The project is still a work in progress, but the basic features are complete. It
 
 ## Installation
 
-Download the latest release from the [releases page](https://github.com/trizin/eth-wallet-toolkit/releases).
+Download the latest release from the [releases page](https://github.com/trizin/ethercli/releases).
 
 ## Build
 
 ```bash
-$ git clone https://github.com/trizin/eth-wallet-toolkit.git
+$ git clone https://github.com/trizin/ethercli.git
 $ go build .
 ```
 
