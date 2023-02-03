@@ -1,7 +1,7 @@
 package hd
 
 import (
-	"eth-toolkit/pkg/eth"
+	"ethercli/pkg/eth"
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/accounts"

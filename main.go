@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"eth-toolkit/pkg/ui"
+	"ethercli/pkg/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
 )

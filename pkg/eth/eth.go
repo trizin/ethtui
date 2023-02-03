@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"math/big"
 
-	"eth-toolkit/pkg/qr"
+	"ethercli/pkg/qr"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"

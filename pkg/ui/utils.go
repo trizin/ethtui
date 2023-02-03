@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"eth-toolkit/pkg/eth"
+	"ethercli/pkg/eth"
 	"fmt"
 	"strings"
 

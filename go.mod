@@ -1,4 +1,4 @@
-module eth-toolkit
+module ethercli
 
 go 1.18
 

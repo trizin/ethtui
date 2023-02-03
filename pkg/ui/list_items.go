@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"eth-toolkit/pkg/hd"
+	"ethercli/pkg/hd"
 	"fmt"
 	"strconv"
 
