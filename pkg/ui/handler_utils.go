@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"eth-toolkit/pkg/eth"
+	"ethtui/pkg/eth"
 	"strconv"
 
 	tea "github.com/charmbracelet/bubbletea"
