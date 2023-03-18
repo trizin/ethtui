@@ -162,9 +162,12 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 				output := displayWalletPrivateKey(m.walletData)
 				setOutputState(&m, "Private Key", output)
 			case "new_hd_wallet":
-				output, _ := hdwallet.NewMnemonic(128)
+				size, _ := strconv.Atoi(item.tmp)
+				output, _ := hdwallet.NewMnemonic(size)
 				setOutputState(&m, "Mnemonic Words (seperated by space), SAVE IT somewhere safe", output)
 				m.setInState("new_hd_wallet_output")
+			case "new_hd_wallet_pick":
+				m.loadListItems(getHDWalletChooseItems(m), "Choose Mnemonic Size")
 			case "pk":
 				setInputState(&m, "Private Key", "Private key", item.id)
 			case "sign_message":

@@ -11,7 +11,7 @@ import (
 func getMainItems() []list.Item {
 	items := []list.Item{
 		ListItem{title: "New Wallet", desc: "Create a new wallet", id: "new_wallet"},
-		ListItem{title: "New HD Wallet", desc: "Create a new HD wallet", id: "new_hd_wallet"},
+		ListItem{title: "New HD Wallet", desc: "Create a new HD wallet", id: "new_hd_wallet_pick"},
 		ListItem{title: "Access Wallet", desc: "Access an existing wallet", id: "access_wallet"},
 	}
 	return items
@@ -25,6 +25,16 @@ func getProviderItems(m UI) []list.Item {
 		ListItem{title: "Query Transaction", desc: "Get transaction details", id: "query_tx"},
 		ListItem{title: "Query Block", desc: "Get block details", id: "query_block"},
 		ListItem{title: "Go Back", desc: "Go back to wallet management", id: "back"},
+	}
+	return items
+}
+
+func getHDWalletChooseItems(m UI) []list.Item {
+	items := []list.Item{
+		ListItem{title: "12 Words", desc: "Create a new HD wallet with 12 words", id: "new_hd_wallet", tmp: "128"},
+		ListItem{title: "18 Words", desc: "Create a new HD wallet with 18 words", id: "new_hd_wallet", tmp: "192"},
+		ListItem{title: "24 Words", desc: "Create a new HD wallet with 24 words", id: "new_hd_wallet", tmp: "256"},
+		ListItem{title: "Quit", desc: "Quit to main menu", id: "quit"},
 	}
 	return items
 }

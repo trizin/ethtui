@@ -4,6 +4,7 @@ type ListItem struct {
 	title string
 	desc  string
 	id    string
+	tmp   string
 }
 
 func (i ListItem) Title() string       { return i.title }
