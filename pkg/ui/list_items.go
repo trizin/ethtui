@@ -20,6 +20,7 @@ func getMainItems() []list.Item {
 func getProviderItems(m UI) []list.Item {
 	items := []list.Item{
 		ListItem{title: "Wallet Balance", desc: "Query the balance of active wallet", id: "account_bal"},
+		ListItem{title: "Transfer ERC20 Tokens", desc: "Transfer ERC20 tokens to another wallet", id: "send_erc20_tokens"},
 		ListItem{title: "Send Transaction", desc: "Send a transaction", id: "send_tx"},
 		ListItem{title: "Query Balance", desc: "Query balance of an address", id: "query_bal"},
 		ListItem{title: "Query Transaction", desc: "Get transaction details", id: "query_tx"},
