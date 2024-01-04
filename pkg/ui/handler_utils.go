@@ -2,6 +2,7 @@ package ui
 
 import (
 	"ethtui/pkg/eth"
+	"math/big"
 	"strconv"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -41,6 +42,25 @@ func moveIndex(m UI, s string) (UI, []tea.Cmd) {
 	}
 
 	return m, cmds
+}
+
+func sendERC20Tokens(m UI) (string, error) {
+	toAddress := m.multiInput[0].Value()
+	amount := m.multiInput[1].Value()
+	contractAddress := m.multiInput[2].Value()
+
+	// convert amount to big.Int
+	amountInt, _ := strconv.Atoi(amount)
+	amountWei := big.NewInt(int64(amountInt))
+	amountWei = amountWei.Mul(amountWei, big.NewInt(1e18))
+
+	return eth.TransferERC20Tokens(
+		m.walletData,
+		contractAddress,
+		toAddress,
+		amountWei,
+		m.provider,
+	)
 }
 
 func signTransaction(m UI) (string, error) {
