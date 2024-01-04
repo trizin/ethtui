@@ -60,7 +60,7 @@ func TransferERC20Tokens(wallet WalletData, contractAddress string, toAddress st
 
 	dataStr := string(data) // Convert data to a string
 
-	tx, err := wallet.SignTransaction(nonce, contractAddress, 0, gasLimit, gasPriceFloat, dataStr, chainId.Int64(), gasTipCapFloat)
+	tx, err := wallet.SignTransaction(nonce, contractAddress, 0, int(gasLimit), gasPriceFloat, dataStr, chainId.Int64(), gasTipCapFloat)
 	txhash, err := provider.SendSignedTransaction(tx)
 
 	// Print the transaction hash
