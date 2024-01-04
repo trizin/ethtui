@@ -55,6 +55,33 @@ func (m UI) getInState() string {
 	return m.instate
 }
 
+func (m *UI) setSendERC20TokensView() {
+	m.multiInput = make([]textinput.Model, 3)
+
+	var t textinput.Model
+	for i := range m.multiInput {
+		t = textinput.NewModel()
+		t.CursorStyle = cursorStyle
+
+		switch i {
+		case 0:
+			t.Prompt = "To Address: "
+			t.Placeholder = "0x"
+			t.Focus()
+			t.PromptStyle = focusedStyle
+			t.TextStyle = focusedStyle
+		case 1:
+			t.Placeholder = "0.01"
+			t.Prompt = "Amount: "
+		case 2:
+			t.Prompt = "Contract Address: "
+			t.Placeholder = "0x"
+		}
+
+		m.multiInput[i] = t
+	}
+}
+
 func (m *UI) setMultiInputView() {
 	m.multiInput = make([]textinput.Model, 8)
 

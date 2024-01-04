@@ -102,9 +102,7 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			}
 			m.provider = p
 			loadWalletState(&m, m.walletData)
-
 		}
-
 	} else if m.state == "sign_transaction" {
 		if m.focusIndex == len(m.multiInput) {
 			signedTransaction, err := signTransaction(m)
@@ -112,6 +110,15 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 				return m, nil
 			}
 			setOutputState(&m, "Signed Transaction Hash", signedTransaction)
+			m.setMultiInputView()
+		}
+	} else if m.state == "send_erc20_tokens" {
+		if m.focusIndex == len(m.multiInput) {
+			txhash, err := sendERC20Tokens(m)
+			if handleError(&m, err) {
+				return m, nil
+			}
+			setOutputState(&m, "Transaction Sent", txhash)
 			m.setMultiInputView()
 		}
 	} else if m.state == "keystore_access" {
@@ -144,6 +151,8 @@ func handleEnterPress(m UI) (UI, tea.Cmd) {
 			}
 
 			switch item.id {
+			case "send_erc20_tokens":
+				m.setSendERC20TokensView()
 			case "sign_transaction":
 				m.setMultiInputView()
 			case "keystore_access":
