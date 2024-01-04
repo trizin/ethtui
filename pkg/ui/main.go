@@ -22,7 +22,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch keypress := msg.String(); keypress {
 
 		case "alt+c":
-			if m.state == "input" || m.state == "sign_transaction" || m.state == "keystore_access" {
+			if m.state == "input" || m.state == "sign_transaction" || m.state == "send_erc20_tokens" || m.state == "keystore_access" {
 				m.setInState("")
 				m.setState("main")
 			}
@@ -63,7 +63,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.multiInput[0].Blur()
 				if m.focusIndex < 8 {
 					m.multiInput[m.focusIndex].Focus()
-				}else{
+				} else {
 					m.multiInput[1].Focus()
 				}
 			}
@@ -78,7 +78,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case "tab", "shift+tab", "up", "down":
-			if m.state == "sign_transaction" || m.state == "keystore_access" {
+			if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "send_erc20_tokens" {
 				s := msg.String()
 				m, cmds := moveIndex(m, s)
 				return m, tea.Batch(cmds...)
@@ -103,7 +103,7 @@ func (m UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.input, cmd = m.input.Update(msg)
 	}
 
-	if m.state == "sign_transaction" || m.state == "keystore_access" {
+	if m.state == "sign_transaction" || m.state == "keystore_access" || m.state == "send_erc20_tokens" {
 		cmd = m.updateInputs(msg)
 	}
 
@@ -125,6 +125,16 @@ func (m UI) View() string {
 					b,
 					blurredStyle.Render("Press alt+c to cancel"),
 					blurredStyle.Render("Press alt+e to estimate values (if connected to an RPC)"),
+				))
+
+		case "send_erc20_tokens":
+			b := renderMultiInput(m)
+			return docStyle.Render(
+				fmt.Sprintf(
+					"%s\n\n%s\n%s",
+					titleStyle.Render("Send ERC20 Tokens"),
+					b,
+					blurredStyle.Render("Press alt+c to cancel"),
 				))
 
 		case "keystore_access":
